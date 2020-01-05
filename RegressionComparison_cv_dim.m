@@ -256,10 +256,10 @@ for t = 1:length(ks) %dimensionality of reduced data
             end
         end
     else
-        ridge_rrr_rates(l,t, tt) = nan;
-        ridge_rrr_rates_train(l,t,tt) = nan;
-        ridge_rrrvars(l,t,tt) = nan;
-        ridge_rrrvars_train(l,t, tt) = nan;
+        ridge_rrr_rates(l,t, 1) = nan;
+        ridge_rrr_rates_train(l,t,1) = nan;
+        ridge_rrrvars(l,t,1) = nan;
+        ridge_rrrvars_train(l,t,1) = nan;
     end
     
     %% ISPCA

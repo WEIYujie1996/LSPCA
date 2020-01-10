@@ -1,4 +1,4 @@
-function [A, L, B] = lspca_gamma(X, Y, lambda, gamma, k, L0)
+function [A, L, B] = lspca_gamma_sub(X, Y, lambda, gamma, k, L0)
 
 
         % NOTE: we are using the convention that the the data points lie in the
@@ -86,8 +86,8 @@ else
     manifold = grassmannfactory(p, k, 1);
     %manifold = stiefelfactory(p, k);
     problem.M = manifold;
-    problem.cost  = @(Ltr) (1/Xnorm^2)*lambda*norm(gamma*X - X*Ltr*Ltr', 'fro')^2 + (1/Ynorm^2)*gamma*norm(Y - (X*Ltr)*(pinv(X*Ltr)*Y), 'fro')^2;
-    problem.egrad = @(Ltr) (2*(1/Xnorm^2)*lambda*(1-2*gamma)*((Ltr'*X')*X) - 2*(1/Ynorm^2)*gamma*(pinv(X*Ltr)*Y)*((Y'*(eye(n)-(X*Ltr)*pinv(X*Ltr))*X)))';
+    problem.cost  = @(Ltr) (1/Xnorm^2)*lambda*norm(X - X*Ltr*Ltr', 'fro')^2 + (1/Ynorm^2)*gamma^2*norm(Y - (X*Ltr)*(pinv(X*Ltr)*Y), 'fro')^2;
+    problem.egrad = @(Ltr) (2*(1/Xnorm^2)*lambda*((Ltr'*X')*X) - 2*(1/Ynorm^2)*gamma^2*(pinv(X*Ltr)*Y)*((Y'*(eye(n)-(X*Ltr)*pinv(X*Ltr))*X)))';
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     

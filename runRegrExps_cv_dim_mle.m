@@ -14,7 +14,7 @@ clear; clc;
 rng(0);
 warning('off','all');
 dataset = 'music';
-sigmamin = 0.07; smin = 0.03; sigmamax = 4; smax = 0.95;
+sigmamin = 0.07; smin = 0.03; sigmamax = 6; smax = 0.95;
 % generate sigmas for kernel methods
 numsigmas = 10;
 sigmas = linspace(sigmamin, sigmamax, numsigmas);

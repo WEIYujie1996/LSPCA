@@ -80,8 +80,8 @@ warning('off', 'manopt:getgradient:approx')
 manifold = grassmannfactory(p, k, 1);
 %manifold = stiefelfactory(p, k);
 problem.M = manifold;
-problem.cost  = @(Ltr) (1/Xnorm^2)*lambda*norm(gamma*X - X*Ltr*Ltr', 'fro')^2 + (1/Ynorm^2)*gamma*norm(Y - (X*Ltr)*(pinv(X*Ltr)*Y), 'fro')^2;
-problem.egrad = @(Ltr) (2*(1/Xnorm^2)*lambda*(1-2*gamma)*((Ltr'*X')*X) - 2*(1/Ynorm^2)*gamma*(pinv(X*Ltr)*Y)*((Y'*(eye(n)-(X*Ltr)*pinv(X*Ltr))*X)))';
+problem.cost  = @(Ltr) (1/Xnorm^2)*lambda*norm(X - X*Ltr*Ltr', 'fro')^2 + (1/Ynorm^2)*gamma^2*norm(Y - (X*Ltr)*(pinv(X*Ltr)*Y), 'fro')^2;
+problem.egrad = @(Ltr) (2*(1/Xnorm^2)*lambda*((Ltr'*X')*X) - 2*(1/Ynorm^2)*gamma^2*(pinv(X*Ltr)*Y)*((Y'*(eye(n)-(X*Ltr)*pinv(X*Ltr))*X)))';
 options.verbosity = 0;
 options.stopfun = @mystopfun;
 % solve the subproblem for a number of iterations over the steifel

@@ -1,7 +1,7 @@
 
 %% setup and load data
 %rng(0);
-ks = 2:10;
+ks = 2:3;
 load(strcat(dataset, '.mat'));
 [n, p] = size(X);
 [~, q] = size(Y);
@@ -29,7 +29,7 @@ for t = 1:length(ks) %dimensionality of reduced data
     
     %% PCA
     for l = 1:kfold
-        test_num = l
+        test_num = l;
         % get lth fold
         Xtrain = Xtrains{l};
         Ytrain = Ytrains{l};
@@ -59,7 +59,7 @@ for t = 1:length(ks) %dimensionality of reduced data
     
     %% PLS
     for l = 1:kfold
-        test_num = l
+        test_num = l;
         % get lth fold
         Xtrain = Xtrains{l};
         Ytrain = Ytrains{l};
@@ -97,7 +97,11 @@ for t = 1:length(ks) %dimensionality of reduced data
         
         %solve
         Linit = orth(randn(p,k));
-        [Zlspca, Llspca, B, var_x, var_y, alpha] = lspca_MLE(Xtrain, Ytrain, k, 0, 1e-8);
+%         V = pca(Xtrain);
+%        Linit = V(:,1:2);
+%         c = 0.5;
+%         Linit = orth((1-c)*V(:,1:2) + c*randn(p,k));
+        [Zlspca, Llspca, B, var_x, var_y, alpha] = lspca_MLE_sub(Xtrain, Ytrain, k, Linit, 1e-8);
         Ls{l,t} = Llspca;
         %predict
         LSPCAXtest = Xtest*Llspca;
@@ -112,9 +116,8 @@ for t = 1:length(ks) %dimensionality of reduced data
         LSPCArates_train(l,t) = train_err;
         LSPCAvar(l,t) = norm(LSPCAXtest, 'fro') / norm(Xtest, 'fro');
         LSPCAvar_train(l,t) = norm(Zlspca, 'fro') / norm(Xtrain, 'fro');
-        
     end
-    (LSPCArates - PCArates)
+    mean(LSPCArates)
     
     %% kLSPCA
 
@@ -128,9 +131,11 @@ for t = 1:length(ks) %dimensionality of reduced data
         Ytest = Ytests{l};
         [ntest, ~] = size(Ytest);
         
+        Linit = orth(randn(ntrain,k));
+        %Linit = 0;
         for ss = 1:length(sigmas)
-            sigma = sigmas(ss);
-            [Zklspca, Lorth, B, Klspca] = klspca_MLE(Xtrain, Ytrain, sigma, k, 0, 0, 1e-10);
+            sigma = sigmas(ss)
+            [Zklspca, Lorth, B, Klspca] = klspca_MLE_sub(Xtrain, Ytrain, sigma, k, Linit, 0, 1e-10);
             embedFunc = @(data) klspca_embed(data, Xtrain, Lorth, sigma);
             kLs{l,t,ss} = Lorth;
             kLSPCAXtest = embedFunc(Xtest);
@@ -146,6 +151,7 @@ for t = 1:length(ks) %dimensionality of reduced data
             kLSPCAvar_train(l,t,ss) = norm(Zklspca, 'fro') / norm(Klspca, 'fro');
         end
     end
+    mean(kLSPCArates)
     
     %% KPCA
     for l = 1:kfold
@@ -270,7 +276,7 @@ for t = 1:length(ks) %dimensionality of reduced data
             SPPCAYtrain = {};
             sppca_err = [];
             % solve
-            for count = 1:10 %do 10 initializations and take the best b/c ends up in bad local minima a lot
+            for count = 1%:10 %do 10 initializations and take the best b/c ends up in bad local minima a lot
                 [Zsppca, Lsppca, B, W_x, W_y, var_x, var_y] = SPPCA(Xtrain,Ytrain,k,exp(-10), randn(p,k), randn(q,k));
                 Zsppcas{count} = Zsppca;
                 Lsppcas{count} = Lsppca;
@@ -300,7 +306,6 @@ for t = 1:length(ks) %dimensionality of reduced data
         SPPCAvar(l,t) = nan;
         SPPCAvar_train(l,t) = nan;
     end
-    (LSPCArates - SPPCArates)
     
     %% Barshan
     
@@ -328,7 +333,6 @@ for t = 1:length(ks) %dimensionality of reduced data
         SPCAvar(l,t) = norm(Xtest*Lspca', 'fro') / norm(Xtest, 'fro');
         SPCAvar_train(l,t) = norm(Xtrain*Lspca', 'fro') / norm(Xtrain, 'fro');
     end
-    (LSPCArates - SPCArates)
     
     %% Perform Barshan's KSPCA based 2D embedding
     for l = 1:kfold
@@ -399,7 +403,7 @@ for t = 1:length(ks) %dimensionality of reduced data
 end
 
 %% save all data
-save(strcat(dataset, '_results'))
+save(strcat(dataset, '_results_mle'))
 
 %% compute avg performance for each k
 
@@ -464,22 +468,22 @@ sv = std(PCAvar(:,kloc));
 sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
-[~,kloc,gamloc] = ind2sub(size(avgLSPCA), loc);
+[~,kloc] = ind2sub(size(avgLSPCA), loc);
 k = ks(kloc);
-m = mean(LSPCArates(:,kloc,gamloc), 1);
-v = mean(LSPCAvar(:,kloc,gamloc), 1);
-sm = std(LSPCArates(:,kloc,gamloc), 1);
-sv = std(LSPCAvar(:,kloc,gamloc), 1);
+m = mean(LSPCArates(:,kloc), 1);
+v = mean(LSPCAvar(:,kloc), 1);
+sm = std(LSPCArates(:,kloc), 1);
+sv = std(LSPCAvar(:,kloc), 1);
 sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
 loc = find(avgkLSPCA==min(avgkLSPCA,[],'all'),1,'last');
-[~,klock,gamlock,siglock] = ind2sub(size(avgkLSPCA), loc);
+[~,klock,siglock] = ind2sub(size(avgkLSPCA), loc);
 k = ks(klock);
-m = mean(kLSPCArates(:,klock,gamlock,siglock), 1);
-v = mean(kLSPCAvar(:,klock,gamlock,siglock), 1);
-sm = std(kLSPCArates(:,klock,gamlock,siglock), 1);
-sv = std(kLSPCAvar(:,klock,gamlock,siglock), 1);
+m = mean(kLSPCArates(:,klock,siglock), 1);
+v = mean(kLSPCAvar(:,klock,siglock), 1);
+sm = std(kLSPCArates(:,klock,siglock), 1);
+sv = std(kLSPCAvar(:,klock,siglock), 1);
 sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
@@ -549,77 +553,79 @@ sprintf('R4: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
 
-%% print mean performance with std errors
+%% print mean performance with std errors for fixed k
+
+kloc = 9;
+
+m = mean(PCArates(:,kloc));
+v = mean(PCAvar(:,kloc));
+sm = std(PCArates(:,kloc));
+sv = std(PCAvar(:,kloc));
+sprintf('PCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+
+m = mean(LSPCArates(:,kloc), 1);
+v = mean(LSPCAvar(:,kloc), 1);
+sm = std(LSPCArates(:,kloc), 1);
+sv = std(LSPCAvar(:,kloc), 1);
+sprintf('LSPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
 
-m = mean(PCArates);
-v = mean(PCAvar);
-sm = std(PCArates);
-sv = std(PCAvar);
-sprintf('PCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+loc = find(avgkLSPCA(:,kloc,:)==min(avgkLSPCA(:,kloc,:),[],'all'),1,'last');
+[~,~,sigloc] = ind2sub(size(avgkLSPCA(:,kloc,:)), loc);
+m = mean(kLSPCArates(:,kloc,sigloc), 1);
+v = mean(kLSPCAvar(:,kloc,sigloc), 1);
+sm = std(kLSPCArates(:,kloc,sigloc), 1);
+sv = std(kLSPCAvar(:,kloc,sigloc), 1);
+sprintf('kLSPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-[~, gamloc] = min(min(avgLSPCA,[], 3),[], 2);
-[~, lamloc] = min(min(avgLSPCA,[], 2),[], 3);
-m = mean(LSPCArates(:,:,gamloc,lamloc), 1);
-v = mean(LSPCAvar(:,:,gamloc,lamloc), 1);
-sm = std(LSPCArates(:,:,gamloc,lamloc), 1);
-sv = std(LSPCAvar(:,:,gamloc,lamloc), 1);
-sprintf('LSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-[~, gamloc] = min(min(min(avgkLSPCA,[], 4),[], 3), [], 2);
-[~, lamlock] = min(min(min(avgkLSPCA,[], 2),[], 4), [], 3);
-[~, siglock] = min(min(min(avgkLSPCA,[], 2),[], 3), [], 4);
-m = mean(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
-v = mean(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
-sm = std(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
-sv = std(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
-sprintf('kLSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+m = mean(ISPCArates(:,kloc));
+v = mean(ISPCAvar(:,kloc));
+sm = std(ISPCArates(:,kloc));
+sv = std(ISPCAvar(:,kloc));
+sprintf('ISPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-m = mean(ISPCArates);
-v = mean(ISPCAvar);
-sm = std(ISPCArates);
-sv = std(ISPCAvar);
-sprintf('ISPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+m = mean(SPPCArates(:,kloc));
+v = mean(SPPCAvar(:,kloc));
+sm = std(SPPCArates(:,kloc));
+sv = std(SPPCAvar(:,kloc));
+sprintf('SPPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-m = mean(SPPCArates);
-v = mean(SPPCAvar);
-sm = std(SPPCArates);
-sv = std(SPPCAvar);
-sprintf('SPPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+m = mean(SPCArates(:,kloc));
+v = mean(SPCAvar(:,kloc));
+sm = std(SPCArates(:,kloc));
+sv = std(SPCAvar(:,kloc));
+sprintf('Barshanerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-m = mean(SPCArates);
-v = mean(SPCAvar);
-sm = std(SPCArates);
-sv = std(SPCAvar);
-sprintf('Barshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+loc = find(avgkSPCA(:,kloc,:)==min(avgkSPCA(:,kloc,:),[],'all'),1,'last');
+[~,~,sigloc] = ind2sub(size(avgkSPCA(:,kloc,:)), loc);
+m = mean(kSPCArates(:,kloc,sigloc));
+v = mean(kSPCAvar(:,kloc,sigloc));
+sm = std(kSPCArates(:,kloc,sigloc));
+sv = std(kSPCAvar(:,kloc,sigloc));
+sprintf('kBarshanerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-[~, locb] = min(avgkSPCA,[], 2);
-m = mean(kSPCArates(:,:,locb));
-v = mean(kSPCAvar(:,:,locb));
-sm = std(kSPCArates(:,:,locb));
-sv = std(kSPCAvar(:,:,locb));                                                                            
-sprintf('kBarshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-m = mean(SSVDrates);
-v = mean(SSVDvar);
-sm = std(SSVDrates);
-sv = std(SSVDvar);
-sprintf('SSVD: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+m = mean(SSVDrates(:,kloc));
+v = mean(SSVDvar(:,kloc));
+sm = std(SSVDrates(:,kloc));
+sv = std(SSVDvar(:,kloc));
+sprintf('SSVD: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
 loc = 1; % RRR with parameter value 0
-m = mean(ridge_rrr_rates(:,loc), 1);
-v = mean(ridge_rrrvars(:,loc), 1);
-sm = std(ridge_rrr_rates(:,loc), 1);
-sv = std(ridge_rrrvars(:,loc), 1);
+m = mean(ridge_rrr_rates(:,kloc,loc), 1);
+v = mean(ridge_rrrvars(:,kloc,loc), 1);
+sm = std(ridge_rrr_rates(:,kloc,loc), 1);
+sv = std(ridge_rrrvars(:,kloc,loc), 1);
 sprintf('RRR: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-[~, locr4] = min(avgR4_train);
-m = mean(ridge_rrr_rates(:,locr4), 1);
-v = mean(ridge_rrrvars(:,locr4), 1);
-sm = std(ridge_rrr_rates(:,locr4), 1);
-sv = std(ridge_rrrvars(:,locr4), 1);
-sprintf('R4: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
+loc = find(avgR4(:,kloc,:)==min(avgR4(:,kloc,:),[],'all'),1,'last');
+[~,~,locr4] = ind2sub(size(avgR4(:,kloc,:)), loc);
+m = mean(ridge_rrr_rates(:,kloc,locr4), 1);
+v = mean(ridge_rrrvars(:,kloc,locr4), 1);
+sm = std(ridge_rrr_rates(:,kloc,locr4), 1);
+sv = std(ridge_rrrvars(:,kloc,locr4), 1);
+sprintf('R4: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
 
 %%% plot error - var tradeoff curves

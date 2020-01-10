@@ -1,7 +1,7 @@
 
 %% setup and load data
 %rng(0);
-ks = 2;
+ks = 2:10;
 load(strcat(dataset, '.mat'));
 [n, p] = size(X);
 [~, q] = size(Y);
@@ -430,192 +430,192 @@ end
 %% save all data
 save(strcat(dataset, '_results_ss'))
 
-%% compute avg performance for each k
-
-%means
-avgPCA(t) = mean(PCArates);
-avgPCA_lab(t) = mean(PCArates_lab);
-avgkPCA(t, :) = mean(kPCArates);
-avgkPCA_lab(t, :) = mean(kPCArates_lab);
-avgPLS(t) = mean(PLSrates);
-avgPLS_lab(t) = mean(PLSrates_lab);
-avgLSPCA(t, :, :) = mean(LSPCArates, 1);
-avgLSPCA_lab(t, :, :) = mean(LSPCArates_lab, 1);
-avgkLSPCA(t, :, :, :) = mean(kLSPCArates, 1);
-avgkLSPCA_lab(t, :, :, :) = mean(kLSPCArates_lab, 1);
-avgSPCA(t) = mean(SPCArates);
-avgSPCA_lab(t) = mean(SPCArates_lab);
-avgkSPCA(t,:) = mean(kSPCArates);
-avgkSPCA_lab(t,:) = mean(kSPCArates_lab);
-avgISPCA(t) = mean(ISPCArates);
-avgISPCA_lab(t) = mean(ISPCArates_lab);
-avgSPPCA(t) = mean(SPPCArates);
-avgSPPCA_lab(t) = mean(SPPCArates_lab);
-avgR4(t, :) = mean(ridge_rrr_rates, 1);
-avgR4_lab(t, :) = mean(ridge_rrr_rates_lab, 1);
-% avgSSVD(t) = mean(SSVDrates);
-% avgSSVD_lab(t) = mean(SSVDrates_lab);
-
-avgPCAvar(t) = mean(PCAvar);
-avgkPCAvar(t, :) = mean(kPCAvar);
-avgPLSvar(t) = mean(PLSvar);
-avgLSPCAvar(t, :, :) = mean(LSPCAvar, 1);
-avgkLSPCAvar(t, :, :, :) = mean(kLSPCAvar, 1);
-avgSPCAvar(t) = mean(SPCAvar);
-avgkSPCAvar(t, :) = mean(kSPCAvar);
-avgISPCAvar(t) = mean(ISPCAvar);
-avgSPPCAvar(t) = mean(SPPCAvar);
-avgR4var(t, :) = mean(ridge_rrrvars, 1);
-% avgSSVDvar(t) = mean(SSVDvar);
-
-
-avgPCAvar_lab(t) = mean(PCAvar_lab);
-avgkPCAvar_lab(t, :) = mean(kPCAvar_lab);
-avgPLSvar_lab(t) = mean(PLSvar_lab);
-avgLSPCAvar_lab(t, :, :) = mean(LSPCAvar_lab, 1);
-avgkLSPCAvar_lab(t, :, :, :) = mean(kLSPCAvar_lab, 1);
-avgSPCAvar_lab(t) = mean(SPCAvar_lab);
-avgkSPCAvar_lab(t, :) = mean(kSPCAvar_lab);
-avgISPCAvar_lab(t) = mean(ISPCAvar_lab);
-avgSPPCAvar_lab(t) = mean(SPPCAvar_lab);
-avgR4var_lab(t, :) = mean(ridge_rrrvars_lab, 1);
-% avgSSVDvar_lab(t) = mean(SSVDvar_lab);
-
-%% print mean performance with std errors
-
-
-m = mean(PCArates);
-v = mean(PCAvar);
-sm = std(PCArates);
-sv = std(PCAvar);
-sprintf('PCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-[~, gamloc] = min(min(avgLSPCA,[], 3),[], 2);
-[~, lamloc] = min(min(avgLSPCA,[], 2),[], 3);
-m = mean(LSPCArates(:,:,gamloc,lamloc), 1);
-v = mean(LSPCAvar(:,:,gamloc,lamloc), 1);
-sm = std(LSPCArates(:,:,gamloc,lamloc), 1);
-sv = std(LSPCAvar(:,:,gamloc,lamloc), 1);
-sprintf('LSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-[~, gamloc] = min(min(min(avgkLSPCA,[], 4),[], 3), [], 2);
-[~, lamlock] = min(min(min(avgkLSPCA,[], 2),[], 4), [], 3);
-[~, siglock] = min(min(min(avgkLSPCA,[], 2),[], 3), [], 4);
-m = mean(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
-v = mean(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
-sm = std(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
-sv = std(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
-sprintf('kLSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-m = mean(ISPCArates);
-v = mean(ISPCAvar);
-sm = std(ISPCArates);
-sv = std(ISPCAvar);
-sprintf('ISPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-m = mean(SPPCArates);
-v = mean(SPPCAvar);
-sm = std(SPPCArates);
-sv = std(SPPCAvar);
-sprintf('SPPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-m = mean(SPCArates);
-v = mean(SPCAvar);
-sm = std(SPCArates);
-sv = std(SPCAvar);
-sprintf('Barshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-[~, locb] = min(avgkSPCA,[], 2);
-m = mean(kSPCArates(:,:,locb));
-v = mean(kSPCAvar(:,:,locb));
-sm = std(kSPCArates(:,:,locb));
-sv = std(kSPCAvar(:,:,locb));                                                                            
-sprintf('kBarshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-m = mean(SSVDrates);
-v = mean(SSVDvar);
-sm = std(SSVDrates);
-sv = std(SSVDvar);
-sprintf('SSVD: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-loc = 1; % RRR with parameter value 0
-m = mean(ridge_rrr_rates(:,loc), 1);
-v = mean(ridge_rrrvars(:,loc), 1);
-sm = std(ridge_rrr_rates(:,loc), 1);
-sv = std(ridge_rrrvars(:,loc), 1);
-sprintf('RRR: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-[~, locr4] = min(avgR4_lab);
-m = mean(ridge_rrr_rates(:,locr4), 1);
-v = mean(ridge_rrrvars(:,locr4), 1);
-sm = std(ridge_rrr_rates(:,locr4), 1);
-sv = std(ridge_rrrvars(:,locr4), 1);
-sprintf('R4: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-
-
-
-%% plot error - var tradeoff curves
-
-
-for t = 1:length(ks)
-    figure()
-    hold on
-    plot(avgPCAvar_lab(t), avgPCA(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
-    %plot(avgkPCAvar_lab(t), avgkPCA(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgLSPCAvar_lab(t,:,lamloc), avgLSPCA(t, :,lamloc), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgkLSPCAvar_lab(t,:,lamlock,siglock), avgkLSPCA(t, :,lamlock,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgISPCAvar_lab(t), avgISPCA(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgSPPCAvar_lab(t), avgSPPCA(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgSPCAvar_lab(t), avgSPCA(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgkSPCAvar_lab(t,locb), avgkSPCA(t), '>', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgR4var_lab(t,2:end), avgR4(t, 2:end), ':', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgR4var_lab(t,1), avgR4(t, 1), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgPLSvar_lab(t), avgPLS(t), 'h', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgSSVDvar_lab(t), avgSSVD(t), 'd', 'MarkerSize', 20, 'LineWidth', 2)
-    
-    xlabel('Variation Explained', 'fontsize', 25)
-    %title('unlab', 'fontsize', 25)
-    ylabel('MSE', 'fontsize', 25)
-    %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
-    set(gca, 'fontsize', 25)
-    lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
-    %lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
-    %ylim([0, 0.12])
-    %set(gca, 'YScale', 'log')
-    xlim([0,1])
-end
-saveas(gcf, strcat(dataset, 'multi_obj_gamma_ss.jpg'))
-
-
-%% plot labing error - var tradeoff curves
-for t = 1:length(ks)
-    figure()
-    hold on
-    plot(avgPCAvar_lab(t), avgPCA_lab(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
-    %    plot(avgkPCAvar_lab(t), avgkPCA_lab(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgLSPCAvar_lab(t,:,lamloc), avgLSPCA_lab(t, :,lamloc), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgkLSPCAvar_lab(t,:,lamlock,siglock), avgkLSPCA_lab(t, :,lamlock,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgISPCAvar_lab(t), avgISPCA_lab(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgSPPCAvar_lab(t), avgSPPCA_lab(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgSPCAvar_lab(t), avgSPCA_lab(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgkSPCAvar_lab(t), avgkSPCA_lab(t), '>', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgR4var_lab(t,2:end), avgR4_lab(t, 2:end), ':', 'LineWidth', 2, 'MarkerSize', 20)
-    plot(avgR4var_lab(t,1), avgR4_lab(t, 1), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgPLSvar_lab(t), avgPLS_lab(t), 'h', 'MarkerSize', 20, 'LineWidth', 2)
-    plot(avgSSVDvar_lab(t), avgSSVD_lab(t), 'd', 'MarkerSize', 20, 'LineWidth', 2)
-    
-    xlabel('Variation Explained', 'fontsize', 25)
-    %title('lab', 'fontsize', 25)
-    ylabel('MSE', 'fontsize', 25)
-    %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
-    set(gca, 'fontsize', 25)
-    lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
-    %ylim([0, 0.12])
-    %set(gca, 'YScale', 'log')
-    xlim([0,1])
-end
-saveas(gcf, strcat(dataset, 'multi_obj_lab_gamma_ss.jpg'))
-
+% %% compute avg performance for each k
+% 
+% %means
+% avgPCA(t) = mean(PCArates);
+% avgPCA_lab(t) = mean(PCArates_lab);
+% avgkPCA(t, :) = mean(kPCArates);
+% avgkPCA_lab(t, :) = mean(kPCArates_lab);
+% avgPLS(t) = mean(PLSrates);
+% avgPLS_lab(t) = mean(PLSrates_lab);
+% avgLSPCA(t, :, :) = mean(LSPCArates, 1);
+% avgLSPCA_lab(t, :, :) = mean(LSPCArates_lab, 1);
+% avgkLSPCA(t, :, :, :) = mean(kLSPCArates, 1);
+% avgkLSPCA_lab(t, :, :, :) = mean(kLSPCArates_lab, 1);
+% avgSPCA(t) = mean(SPCArates);
+% avgSPCA_lab(t) = mean(SPCArates_lab);
+% avgkSPCA(t,:) = mean(kSPCArates);
+% avgkSPCA_lab(t,:) = mean(kSPCArates_lab);
+% avgISPCA(t) = mean(ISPCArates);
+% avgISPCA_lab(t) = mean(ISPCArates_lab);
+% avgSPPCA(t) = mean(SPPCArates);
+% avgSPPCA_lab(t) = mean(SPPCArates_lab);
+% avgR4(t, :) = mean(ridge_rrr_rates, 1);
+% avgR4_lab(t, :) = mean(ridge_rrr_rates_lab, 1);
+% % avgSSVD(t) = mean(SSVDrates);
+% % avgSSVD_lab(t) = mean(SSVDrates_lab);
+% 
+% avgPCAvar(t) = mean(PCAvar);
+% avgkPCAvar(t, :) = mean(kPCAvar);
+% avgPLSvar(t) = mean(PLSvar);
+% avgLSPCAvar(t, :, :) = mean(LSPCAvar, 1);
+% avgkLSPCAvar(t, :, :, :) = mean(kLSPCAvar, 1);
+% avgSPCAvar(t) = mean(SPCAvar);
+% avgkSPCAvar(t, :) = mean(kSPCAvar);
+% avgISPCAvar(t) = mean(ISPCAvar);
+% avgSPPCAvar(t) = mean(SPPCAvar);
+% avgR4var(t, :) = mean(ridge_rrrvars, 1);
+% % avgSSVDvar(t) = mean(SSVDvar);
+% 
+% 
+% avgPCAvar_lab(t) = mean(PCAvar_lab);
+% avgkPCAvar_lab(t, :) = mean(kPCAvar_lab);
+% avgPLSvar_lab(t) = mean(PLSvar_lab);
+% avgLSPCAvar_lab(t, :, :) = mean(LSPCAvar_lab, 1);
+% avgkLSPCAvar_lab(t, :, :, :) = mean(kLSPCAvar_lab, 1);
+% avgSPCAvar_lab(t) = mean(SPCAvar_lab);
+% avgkSPCAvar_lab(t, :) = mean(kSPCAvar_lab);
+% avgISPCAvar_lab(t) = mean(ISPCAvar_lab);
+% avgSPPCAvar_lab(t) = mean(SPPCAvar_lab);
+% avgR4var_lab(t, :) = mean(ridge_rrrvars_lab, 1);
+% % avgSSVDvar_lab(t) = mean(SSVDvar_lab);
+% 
+% %% print mean performance with std errors
+% 
+% 
+% m = mean(PCArates);
+% v = mean(PCAvar);
+% sm = std(PCArates);
+% sv = std(PCAvar);
+% sprintf('PCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% [~, gamloc] = min(min(avgLSPCA,[], 3),[], 2);
+% [~, lamloc] = min(min(avgLSPCA,[], 2),[], 3);
+% m = mean(LSPCArates(:,:,gamloc,lamloc), 1);
+% v = mean(LSPCAvar(:,:,gamloc,lamloc), 1);
+% sm = std(LSPCArates(:,:,gamloc,lamloc), 1);
+% sv = std(LSPCAvar(:,:,gamloc,lamloc), 1);
+% sprintf('LSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% [~, gamloc] = min(min(min(avgkLSPCA,[], 4),[], 3), [], 2);
+% [~, lamlock] = min(min(min(avgkLSPCA,[], 2),[], 4), [], 3);
+% [~, siglock] = min(min(min(avgkLSPCA,[], 2),[], 3), [], 4);
+% m = mean(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
+% v = mean(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
+% sm = std(kLSPCArates(:,:,gamloc,lamlock,siglock), 1);
+% sv = std(kLSPCAvar(:,:,gamloc,lamlock,siglock), 1);
+% sprintf('kLSPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% m = mean(ISPCArates);
+% v = mean(ISPCAvar);
+% sm = std(ISPCArates);
+% sv = std(ISPCAvar);
+% sprintf('ISPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% m = mean(SPPCArates);
+% v = mean(SPPCAvar);
+% sm = std(SPPCArates);
+% sv = std(SPPCAvar);
+% sprintf('SPPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% m = mean(SPCArates);
+% v = mean(SPCAvar);
+% sm = std(SPCArates);
+% sv = std(SPCAvar);
+% sprintf('Barshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% [~, locb] = min(avgkSPCA,[], 2);
+% m = mean(kSPCArates(:,:,locb));
+% v = mean(kSPCAvar(:,:,locb));
+% sm = std(kSPCArates(:,:,locb));
+% sv = std(kSPCAvar(:,:,locb));                                                                            
+% sprintf('kBarshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% m = mean(SSVDrates);
+% v = mean(SSVDvar);
+% sm = std(SSVDrates);
+% sv = std(SSVDvar);
+% sprintf('SSVD: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% loc = 1; % RRR with parameter value 0
+% m = mean(ridge_rrr_rates(:,loc), 1);
+% v = mean(ridge_rrrvars(:,loc), 1);
+% sm = std(ridge_rrr_rates(:,loc), 1);
+% sv = std(ridge_rrrvars(:,loc), 1);
+% sprintf('RRR: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% [~, locr4] = min(avgR4_lab);
+% m = mean(ridge_rrr_rates(:,locr4), 1);
+% v = mean(ridge_rrrvars(:,locr4), 1);
+% sm = std(ridge_rrr_rates(:,locr4), 1);
+% sv = std(ridge_rrrvars(:,locr4), 1);
+% sprintf('R4: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% 
+% 
+% 
+% %% plot error - var tradeoff curves
+% 
+% 
+% for t = 1:length(ks)
+%     figure()
+%     hold on
+%     plot(avgPCAvar_lab(t), avgPCA(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+%     %plot(avgkPCAvar_lab(t), avgkPCA(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgLSPCAvar_lab(t,:,lamloc), avgLSPCA(t, :,lamloc), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgkLSPCAvar_lab(t,:,lamlock,siglock), avgkLSPCA(t, :,lamlock,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgISPCAvar_lab(t), avgISPCA(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgSPPCAvar_lab(t), avgSPPCA(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgSPCAvar_lab(t), avgSPCA(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgkSPCAvar_lab(t,locb), avgkSPCA(t), '>', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgR4var_lab(t,2:end), avgR4(t, 2:end), ':', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgR4var_lab(t,1), avgR4(t, 1), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgPLSvar_lab(t), avgPLS(t), 'h', 'MarkerSize', 20, 'LineWidth', 2)
+% %     plot(avgSSVDvar_lab(t), avgSSVD(t), 'd', 'MarkerSize', 20, 'LineWidth', 2)
+%     
+%     xlabel('Variation Explained', 'fontsize', 25)
+%     %title('unlab', 'fontsize', 25)
+%     ylabel('MSE', 'fontsize', 25)
+%     %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+%     set(gca, 'fontsize', 25)
+%     lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
+%     %lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
+%     %ylim([0, 0.12])
+%     %set(gca, 'YScale', 'log')
+%     xlim([0,1])
+% end
+% saveas(gcf, strcat(dataset, 'multi_obj_gamma_ss.jpg'))
+% 
+% 
+% %% plot labing error - var tradeoff curves
+% for t = 1:length(ks)
+%     figure()
+%     hold on
+%     plot(avgPCAvar_lab(t), avgPCA_lab(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+%     %    plot(avgkPCAvar_lab(t), avgkPCA_lab(t), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgLSPCAvar_lab(t,:,lamloc), avgLSPCA_lab(t, :,lamloc), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgkLSPCAvar_lab(t,:,lamlock,siglock), avgkLSPCA_lab(t, :,lamlock,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgISPCAvar_lab(t), avgISPCA_lab(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgSPPCAvar_lab(t), avgSPPCA_lab(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgSPCAvar_lab(t), avgSPCA_lab(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgkSPCAvar_lab(t), avgkSPCA_lab(t), '>', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgR4var_lab(t,2:end), avgR4_lab(t, 2:end), ':', 'LineWidth', 2, 'MarkerSize', 20)
+%     plot(avgR4var_lab(t,1), avgR4_lab(t, 1), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgPLSvar_lab(t), avgPLS_lab(t), 'h', 'MarkerSize', 20, 'LineWidth', 2)
+%     plot(avgSSVDvar_lab(t), avgSSVD_lab(t), 'd', 'MarkerSize', 20, 'LineWidth', 2)
+%     
+%     xlabel('Variation Explained', 'fontsize', 25)
+%     %title('lab', 'fontsize', 25)
+%     ylabel('MSE', 'fontsize', 25)
+%     %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+%     set(gca, 'fontsize', 25)
+%     lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
+%     %ylim([0, 0.12])
+%     %set(gca, 'YScale', 'log')
+%     xlim([0,1])
+% end
+% saveas(gcf, strcat(dataset, 'multi_obj_lab_gamma_ss.jpg'))
+% 
 
 
 

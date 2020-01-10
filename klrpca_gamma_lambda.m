@@ -1,4 +1,4 @@
-function  [Z, L, B, K] = klrpca_gamma_lambda(X, Y, gamma, lambda, sigma, k, Linit, Kinit)
+function  [Z, L, B, K] = klrpca_gamma_lambda(X, Y, lambda, gamma, sigma, k, Linit, Kinit)
 % Inputs:
 %       X: (n x p) data matrix columns are features rows are
 %       observations

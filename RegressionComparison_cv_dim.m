@@ -106,15 +106,15 @@ for t = 1:length(ks) %dimensionality of reduced data
             for ii = 1:length(Gammas)
                 Gamma = Gammas(ii);
                 if ii == 1
-                    [Zlspca, Llspca, B] = lspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k, 0);
+                    [Zlspca, Llspca, B] = lspca_gamma_sub(Xtrain, Ytrain, Lambda, Gamma, k, 0);
                     %[Zlspca, Llspca, B] = ilspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k);
 
                     
                 else
-                    [Zlspca, Llspca, B] = lspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k, Llspca');
+                    [Zlspca, Llspca, B] = lspca_gamma_sub(Xtrain, Ytrain, Lambda, Gamma, k, Llspca);
                     %[Zlspca, Llspca, B] = ilspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k);
                 end
-                Llspca = Llspca';
+                %Llspca = Llspca';
                 Ls{l,t,ii, jj} = Llspca;
                 %predict
                 LSPCAXtest = Xtest*Llspca';
@@ -158,12 +158,12 @@ for t = 1:length(ks) %dimensionality of reduced data
                     Gamma = Gammas(ii);
                     if ii == 1
                         %[ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, 0);
-                        [ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, 0, 0);
+                        [ Zklspca, Lorth, B, Klspca] = klspca_gamma_sub(Xtrain, Ytrain, Lambda, Gamma, sigma, k, 0, 0);
                     else
                         %[ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Klspca);
-                        [ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Lorth', Klspca);
+                        [ Zklspca, Lorth, B, Klspca] = klspca_gamma_sub(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Lorth, Klspca);
                     end
-                    Lorth = Lorth';
+                    %Lorth = Lorth';
                     embedFunc = @(data) klspca_embed(data, Xtrain, Lorth, sigma);
                     kLs{l,t,ii,jj,kk} = Lorth;
                     kLSPCAXtest = embedFunc(Xtest);

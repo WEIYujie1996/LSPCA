@@ -1,4 +1,4 @@
-function [Z, L, B, K] = klspca_gamma(X, Y, lambda, gamma, sigma, k, L0, Kinit)
+function [Z, L, B, K] = klspca_gamma_sub(X, Y, lambda, gamma, sigma, k, L0, Kinit)
 
 
 % NOTE: we are using the convention that the the data points lie in the
@@ -62,16 +62,13 @@ Xnorm = norm(X, 'fro');
 Ynorm = norm(Y, 'fro');
 
 %anonymous function for calculating Bi from Li and X
-calc_B = @(X, Li) (X*Li') \ Y;
+calc_B = @(X, L) (X*L) \ Y;
 
 % initialize L0 by PCA of X, and B0 by L0
 if (sum(sum(L0 ~=0)) == 0 || lambda == 0)
     L0 = pca(X);
     L0 = L0(:, 1:k); % see the note below about convention for orientation of L
-else
-    L0 = L0';
 end
-% initialize the other optimization variables
 
 %solve the problem using manopt on the grassmann manifold
 % set up the optimization subproblem in manopt
@@ -80,21 +77,19 @@ warning('off', 'manopt:getgradient:approx')
 manifold = grassmannfactory(p, k, 1);
 %manifold = stiefelfactory(p, k);
 problem.M = manifold;
-problem.cost  = @(Ltr) (1/Xnorm^2)*lambda*norm(X - X*Ltr*Ltr', 'fro')^2 + (1/Ynorm^2)*gamma^2*norm(Y - (X*Ltr)*(pinv(X*Ltr)*Y), 'fro')^2;
-problem.egrad = @(Ltr) (2*(1/Xnorm^2)*lambda*((Ltr'*X')*X) - 2*(1/Ynorm^2)*gamma^2*(pinv(X*Ltr)*Y)*((Y'*(eye(n)-(X*Ltr)*pinv(X*Ltr))*X)))';
+problem.cost  = @(L) (1/Xnorm^2)*lambda*norm(X - gamma^-1*X*L*L', 'fro')^2 + (1-lambda)*(1/Ynorm^2)*norm(Y - (X*L)*(pinv(X*L)*Y), 'fro')^2;
+problem.egrad = @(L) (2*(1/Xnorm^2)*lambda*(gamma^-2 - 2/gamma)*((L'*X')*X) - 2*(1-lambda)*(1/Ynorm^2)*(pinv(X*L)*Y)*((Y'*(eye(n)-(X*L)*pinv(X*L))*X)))';
 options.verbosity = 0;
 options.stopfun = @mystopfun;
 % solve the subproblem for a number of iterations over the steifel
 % manifold
-%[Lopt, optcost, info, options] = barzilaiborwein(problem, Ltr, options);
-[Lopt, optcost, info, options] = conjugategradient(problem, L0, options);
+%[Lopt, optcost, info, options] = barzilaiborwein(problem, L0, options);
+[L, ~, ~, ~] = conjugategradient(problem, L0, options);
 
 % set the output variables
-L = Lopt';
 B = calc_B(X, L);
-Z = X*L';
+Z = X*L;
 K = X;
-
 end
 
 function stopnow = mystopfun(problem, x, info, last)

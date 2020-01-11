@@ -103,8 +103,8 @@ end
 
 function f = cost_fun(L, B, B0, X, Ymask, Xnorm, n, gamma, lambda)
 tmp = (X*L)*B + B0;
-f1 = lambda*(1/Xnorm^2)*norm(X - (X*L)*L', 'fro')^2;
-f2 = -(1/n)*(gamma^2)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
+f1 = lambda*(1/Xnorm^2)*norm(X - gamma^-1 * (X*L)*L', 'fro')^2;
+f2 = -(1/n)^2*(1-lambda)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
 f =  f1 + f2;
 end
 
@@ -119,11 +119,11 @@ for j = 1:numClasses
         xi = Xj(i,:)';
         tmp = xi'*L*B + B0;
         weights = exp(tmp - logsumexp(tmp, 2));
-        dLdij = (1/n)*xi*(bj - sum(B.*weights, 2))';
+        dLdij = (1/n)^2*xi*(bj - sum(B.*weights, 2))';
         g = g - dLdij; % add and repeat for next class
     end
 end
-g = (gamma^2)*g + lambda*(1/Xnorm^2)*( 2*L*(L'*(X'*(X*L))) + 2*X'*(X*L*(L'*L)) -4*X'*(X*L) ); %add derivative for PCA term
+g = (1-lambda)*g + 2*lambda*(1/Xnorm^2)*(gamma^-2 - 2/gamma)*((L'*X')*X)'; %add derivative for PCA term
 end
 
 function stopnow = mystopfun(problem, x, info, last)

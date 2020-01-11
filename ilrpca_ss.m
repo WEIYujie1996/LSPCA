@@ -44,7 +44,6 @@ Xld = Xl;
 [nl, p] = size(Xl);
 [nu, ~] = size(Xu);
 n = nu + nl;
-nratio = nl/n;
 [~, q] = size(Yl);
 %useful variables
 numClasses = length(unique(Yl));

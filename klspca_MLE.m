@@ -63,8 +63,8 @@ while notConverged
     warning('off', 'manopt:getgradient:approx')
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
-    problem.cost  = @(L) 0.5*((1/var_y)*norm(Y - X*(L*B), 'fro')^2 + (1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + (p-k)*log(var_x) + k*log(var_x+alpha) + q*log(var_y));
-    problem.egrad = @(L) (1/var_y)*(X'*(Y-X*(L*B)))*B' - (alpha/(var_x+alpha))*(X'*(X*L));
+    problem.cost  = @(L) 0.5*((1/var_y)*(1/Ynorm^2)*norm(Y - X*(L*B), 'fro')^2 + (1/var_x)*(1/Xnorm^2)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha) + n*q*log(var_y));
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*B)))*B' - (1/var_x)*(1/Xnorm^2)*(alpha/(var_x+alpha))*(X'*(X*L));
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     

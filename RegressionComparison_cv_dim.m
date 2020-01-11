@@ -1,11 +1,9 @@
 
 %% setup and load data
-%rng(0);
-ks = 2:10;
 load(strcat(dataset, '.mat'));
 [n, p] = size(X);
 [~, q] = size(Y);
-
+ks = 2:min(10, p-1);
 
 % create same splits to use every time and center
 kfold = 10;
@@ -117,8 +115,8 @@ for t = 1:length(ks) %dimensionality of reduced data
                 %Llspca = Llspca';
                 Ls{l,t,ii, jj} = Llspca;
                 %predict
-                LSPCAXtest = Xtest*Llspca';
-                LSPCAXtrain = Xtrain*Llspca';
+                LSPCAXtest = Xtest*Llspca;
+                LSPCAXtrain = Xtrain*Llspca;
                 LSPCAYtest = LSPCAXtest*B;
                 LSPCAYtrain = LSPCAXtrain*B;
                 lspca_mbd_test{l,t,ii,jj} =LSPCAXtest;

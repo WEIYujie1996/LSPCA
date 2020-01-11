@@ -59,8 +59,8 @@ while notConverged
     warning('off', 'manopt:getgradient:approx')
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
-    problem.cost  = @(L) 0.5*((1/var_y)*(1/Ynorm)*norm(Y - X*(L*B), 'fro')^2 + (1/var_x)*(1/Xnorm)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha) + n*q*log(var_y));
-    problem.egrad = @(L) -(1/var_y)*(1/Ynorm)*(X'*(Y-X*(L*B)))*B' - (1/var_x)*(1/Xnorm)*(alpha/(var_x+alpha))*(X'*(X*L));
+    problem.cost  = @(L) 0.5*((1/var_y)*(1/Ynorm^2)*norm(Y - X*(L*B), 'fro')^2 + (1/var_x)*(1/Xnorm^2)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha) + n*q*log(var_y));
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*B)))*B' - (1/var_x)*(1/Xnorm^2)*(alpha/(var_x+alpha))*(X'*(X*L));
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     options.maxiter = 2000;
@@ -70,7 +70,7 @@ while notConverged
     %[L, fstar, info, ~] = barzilaiborwein(problem, L, options);
     [L, fstar, info, ~] = conjugategradient(problem, L, options);
     %[L, fstar, info, ~] = trustregions(problem, L, options);
-    info(end).iter
+    info(end).iter;
     info(end).gradnorm;
     fstar;
     
@@ -92,7 +92,7 @@ while notConverged
     
     %% test for overall convergence
     niter = niter+1;
-    subspace_discrepancy = 1 - detsim(Lprev', L')
+    subspace_discrepancy = 1 - detsim(Lprev', L');
     if subspace_discrepancy < sstol || niter>500 || (fstar - fstarprev)^2 < sstol
         notConverged = false;
     end

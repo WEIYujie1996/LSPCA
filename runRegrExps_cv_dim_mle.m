@@ -42,6 +42,17 @@ numsigmas = 10;
 sigmas = linspace(sigmamin, sigmamax, numsigmas);
 run RegressionComparison_cv_dim_mle.m
 
+%% Bair Hard
+clear; clc;
+rng(0);
+warning('off','all');
+dataset = 'BairRegressionData_hard';
+sigmamin = 10; sigmamax = 400;
+% generate sigmas for kernel methods
+numsigmas = 10;
+sigmas = linspace(sigmamin, sigmamax, numsigmas);
+run RegressionComparison_cv_dim_mle.m
+
 % %% BarshB
 % clear; clc;
 % rng(0);

@@ -151,91 +151,7 @@ for t = 1:length(ks) %dimensionality of reduced data
         end
     end
     
-%     %% LSPCA
-%     Gammas = [linspace(1, 0.7, 10), logspace(log10(0.7),log10(0.5), 30)];
-%     for l = 1:kfold
-%         test_num = l
-%         r = zeros(length(Gammas), length(sigmas));
-%         rt = zeros(length(Gammas), length(sigmas));
-%         v = zeros(length(Gammas), length(sigmas));
-%         vt = zeros(length(Gammas), length(sigmas));
-%         % get lth fold
-%         Xtrain = Xtrains{l};
-%         Ytrain = Ytrains{l};
-%         [ntrain, ~] = size(Ytrain);
-%         Xtest = Xtests{l};
-%         Ytest = Ytests{l};
-%         [ntest, ~] = size(Ytest);
-%         
-%         Lstemp = {};
-%         lspca_mbd_testtemp = {};
-%         lspca_mbd_traintemp = {};
-%         r = []; rt = []; v = []; vt = [];
-%         %solve
-%         tic
-%         %        if n>=p %use ilrpca
-%         for ii = 1:length(Gammas)
-%             Gamma = Gammas(ii);
-%             if ii == 1
-%                 [Zlspca, Llspca, B] = lrpca_gamma(Xtrain, Ytrain, Gamma, k, 0);
-%             else
-%                 [Zlspca, Llspca, B] = lrpca_gamma(Xtrain, Ytrain, Gamma, k, Llspca');
-%             end
-%             Llspca = Llspca';
-%             Lstemp{ii} = Llspca;
-%             %predict
-%             LSPCAXtest = Xtest*Llspca';
-%             LSPCAXtrain = Zlspca;
-%             [~, LSPCAYtest] = max(LSPCAXtest*B(2:end,:) + B(1,:), [], 2);
-%             [~, LSPCAYtrain] = max(Xtrain*Llspca'*B(2:end,:) + B(1,:), [], 2);
-%             lspca_mbd_testtemp{ii} = LSPCAXtest;
-%             lspca_mbd_traintemp{ii} = Zlspca;
-%             % compute error
-%             err = 1 - sum(Ytest == LSPCAYtest) / ntest;
-%             train_err = 1 - sum(Ytrain == LSPCAYtrain) / ntrain;
-%             r(ii) = err;
-%             rt(ii) = train_err;
-%             v(ii) = norm(LSPCAXtest, 'fro') / norm(Xtest, 'fro');
-%             vt(ii) = norm(Zlspca, 'fro') / norm(Xtrain, 'fro');
-%         end
-%         %         else %use iklrpca with linear kernel (faster)
-%         %             for ii = 1:length(Gammas)
-%         %                 Gamma = Gammas(ii);
-%         %                 if ii == 1
-%         %                     [ Zlspca, Lorth, B, Klspca] = iklrpca_gamma(Xtrain, Ytrain, Gamma, 0, k, 0, 0);
-%         %                 else
-%         %                     [ Zlspca, Lorth, B, Klspca] = iklrpca_gamma(Xtrain, Ytrain, Gamma, 0, k, Lorth', Klspca);
-%         %                 end
-%         %                 Lorth = Lorth';
-%         %                 Lstemp{ii} = Lorth;
-%         %                 Ktest = Xtest*Xtrain';
-%         %                 LSPCAXtest = Ktest*Lorth';
-%         %                 LSPCAXtrain = Zlspca;
-%         %                 lspca_mbd_testtemp{ii} = LSPCAXtest;
-%         %                 lspca_mbd_traintemp{ii} = Zlspca;
-%         %                 [~, LSPCAYtest] = max(LSPCAXtest*B(2:end,:) + B(1,:), [], 2);
-%         %                 [~, LSPCAYtrain] = max(Zlspca*B(2:end,:) + B(1,:), [], 2);
-%         %                 err = 1 - sum(Ytest == LSPCAYtest)/ntest;
-%         %                 train_err = 1 - sum(Ytrain == LSPCAYtrain)/ntrain;
-%         %                 r(ii) = err;
-%         %                 rt(ii) = train_err;
-%         %                 v(ii) = norm(LSPCAXtest, 'fro') / norm(Ktest, 'fro');
-%         %                 vt(ii) = norm(Zlspca, 'fro') / norm(Klspca, 'fro');
-%         %             end
-%         %         end
-%         LSPCAminrate = min(r)
-%         Ls(l,t,:) = Lstemp;
-%         lspca_mbd_test(l,t,:) = lspca_mbd_testtemp;
-%         lspca_mbd_train(l,t,:) = lspca_mbd_traintemp;
-%         LSPCArates(l,t,:) = r;
-%         LSPCArates_train(l,t,:) = rt;
-%         LSPCAvar(l,t,:) = v;
-%         LSPCAvar_train(l,t,:) = vt;
-%         avgLSPCAtimes(l,t) = toc/length(Gammas);
-%         avgLSPCAtimes(l,t)
-%     end
-    
-    
+
     %% kLSPCA
     %Lambda = 5;
     Lambdas = linspace(1,5,5);
@@ -266,7 +182,7 @@ for t = 1:length(ks) %dimensionality of reduced data
                         [ Zklspca, Lorth, B, Klspca] = klrpca_gamma_lambda(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Lorth, Klspca);
                     end
                     %Lorth = Lorth';
-                    embedFunc = @(data) klspca_embed(data, Xtrain, Lorth', sigma);
+                    embedFunc = @(data) klspca_embed(data, Xtrain, Lorth, sigma);
                     kLs{l,t,ii,jj,kk} = Lorth;
                     kLSPCAXtest = embedFunc(Xtest);
                     klspca_mbd_test{l,t,ii,jj,kk} = kLSPCAXtest;
@@ -285,60 +201,6 @@ for t = 1:length(ks) %dimensionality of reduced data
         end
     end
     
-%     %% kLSPCA
-%     Gammas = [linspace(1, 0.7, 10), logspace(log10(0.7),log10(0.5), 30)];
-%     for l = 1:kfold
-%         test_num = l
-%         r = zeros(length(Gammas), length(sigmas));
-%         rt = zeros(length(Gammas), length(sigmas));
-%         v = zeros(length(Gammas), length(sigmas));
-%         vt = zeros(length(Gammas), length(sigmas));
-%         % get lth fold
-%         Xtrain = Xtrains{l};
-%         Ytrain = Ytrains{l};
-%         [ntrain, ~] = size(Ytrain);
-%         Xtest = Xtests{l};
-%         Ytest = Ytests{l};
-%         [ntest, ~] = size(Ytest);
-%         tic
-%         for jj = 1:length(sigmas)
-%             sigma = sigmas(jj)
-%             for ii = 1:length(Gammas)
-%                 Gamma = Gammas(ii);
-%                 if ii == 1
-%                     [ Zklspca, Lorth, B, Klspca] = klrpca_gamma(Xtrain, Ytrain, Gamma, sigma, k, 0, 0);
-%                 else
-%                     [ Zklspca, Lorth, B, Klspca] = klrpca_gamma(Xtrain, Ytrain, Gamma, sigma, k, Lorth', Klspca);
-%                 end
-%                 Lorth = Lorth';
-%                 embedFunc = @(data) klspca_embed(data, Xtrain, Lorth, sigma);
-%                 kLstemp{ii,jj} = Lorth;
-%                 kLSPCAXtest = embedFunc(Xtest);
-%                 kLSPCAXtrain = Zklspca;
-%                 klspca_mbd_testtemp{ii,jj} = kLSPCAXtest;
-%                 klspca_mbd_traintemp{ii,jj} = Zklspca;
-%                 [~, kLSPCAYtest] = max(kLSPCAXtest*B(2:end,:) + B(1,:), [], 2);
-%                 [~, kLSPCAYtrain] = max(Zklspca*B(2:end,:) + B(1,:), [], 2);
-%                 err = 1 - sum(Ytest == kLSPCAYtest)/ntest;
-%                 train_err = 1 - sum(Ytrain == kLSPCAYtrain)/ntrain;
-%                 r(ii,jj) = err;
-%                 rt(ii,jj) = train_err;
-%                 v(ii,jj) = norm(kLSPCAXtest, 'fro') / norm(gaussian_kernel(Xtest,Xtrain,sigma), 'fro');
-%                 vt(ii,jj) = norm(Zklspca, 'fro') / norm(Klspca, 'fro');
-%             end
-%         end
-%         
-%         kLSPCAminrate = min(r)
-%         kLs(l,t,:,:) = kLstemp;
-%         klspca_mbd_test(l,t,:,:) = klspca_mbd_testtemp;
-%         klspca_mbd_train(l,t,:,:) = klspca_mbd_traintemp;
-%         kLSPCArates(l,t,:,:) = r;
-%         kLSPCArates_train(l,t,:,:) = rt;
-%         kLSPCAvar(l,t,:,:) = v;
-%         kLSPCAvar_train(l,t,:,:) = vt;
-%         avgkLSPCAtimes(l,t) = toc/(length(Gammas)*length(sigmas));
-%         avgkLSPCAtimes(l,t)
-%     end
     
     %% KPCA
     for l = 1:kfold

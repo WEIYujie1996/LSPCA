@@ -109,7 +109,7 @@ end
 function f = cost_fun(L, B, B0, X, Ymask, Xnorm, n, gamma, lambda)
 tmp = (X*L)*B + B0;
 f1 = lambda*(1/Xnorm^2)*norm(X - gamma^-1 * (X*L)*L', 'fro')^2;
-f2 = -(1/n)^2*(1-lambda)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
+f2 = -(1/n)*(1-lambda)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
 f =  f1 + f2;
 end
 
@@ -124,7 +124,7 @@ for j = 1:numClasses
         xi = Xj(i,:)';
         tmp = xi'*L*B + B0;
         weights = exp(tmp - logsumexp(tmp, 2));
-        dLdij = (1/n)^2*xi*(bj - sum(B.*weights, 2))';
+        dLdij = (1/n)*xi*(bj - sum(B.*weights, 2))';
         g = g - dLdij; % add and repeat for next class
     end
 end

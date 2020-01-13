@@ -1,8 +1,10 @@
 %% setup and load data
+%rng(0);
+ks = 2:10;
 load(strcat(dataset, '.mat'));
 [n, p] = size(X);
 [~, q] = size(Y);
-ks = 2:min(10, p-1);
+
 
 % create same splits to use every time and center
 kfold = 10;
@@ -56,151 +58,7 @@ for t = 1:length(ks) %dimensionality of reduced data
         PCAvar_train(l,t) = norm(Xtrain*Lpca'*Lpca, 'fro') / norm(Xtrain, 'fro');
     end
     
-    %         %% kPCA
-    %     for l = 1:kfold
-    %         test_num = l
-    %         % get lth fold
-    %         Xtrain = Xtrains{l};
-    %         Ytrain = Ytrains{l};
-    %         Xtest = Xtests{l};
-    %         Ytest = Ytests{l};
-    %
-    %         if l == 1
-    %             for jj = 1:length(sigmas)
-    %                 sigma = sigmas(jj)
-    %                 K = gaussian_kernel(Xtrainh, Xtrainh, sigma);
-    %                 [Lkpca, Zkpca] = pca(K, 'NumComponents', k);
-    %                 Lkpca = Lkpca';
-    %                 B = mnrfit(Zkpca,Ytrainh, 'Model', 'nominal', 'Interactions', 'on');
-    %                 [~, Yhat] = max(mnrval(B,gaussian_kernel(Xtesth, Xtrainh, sigma)*Lkpca'),[], 2);
-    %                 PCAratesh(jj) = 1 - sum(Yhat == Ytesth) / nHoldTest;
-    %             end
-    %             sigloc = find(PCAratesh==min(PCAratesh,[],'all'),1,'last');
-    %             bestSigma = sigmas(sigloc);
-    %         end
-    %
-    %         K = gaussian_kernel(Xtrain, Xtrain, bestSigma);
-    %         Ktest = gaussian_kernel(Xtest, Xtrain, sigma);
-    %         tic
-    %         [Lkpca, Zkpca] = pca(K, 'NumComponents', k);
-    %         kPCAtimes(l,t) = toc;
-    %         Zkpcas{l,t} = Zkpca;
-    %         Lkpca = Lkpca';
-    %         % compute embedding for test data
-    %         kpcaXtest = Ktest*Lkpca';
-    %         kpcaXtests{l,t} = kpcaXtest;
-    %         % compute error
-    %         B = mnrfit(Zkpca,Ytrain, 'Model', 'nominal', 'Interactions', 'on');
-    %         [~, Yhat] = max(mnrval(B,kpcaXtest),[], 2);
-    %         [~,kpcaYtrain] = max(mnrval(B,Zkpca),[], 2);
-    %         kPCArates(l,t) = 1 - sum(Yhat == Ytest) / ntest
-    %         kPCArates_train(l,t) = 1 - sum(kpcaYtrain == Ytrain) / ntrain;
-    %         kPCAvar(l,t) = norm(kpcaXtest, 'fro') / norm(Ktest, 'fro');
-    %         kPCAvar_train(l,t) = norm(Zkpca, 'fro') / norm(K, 'fro');
-    %     end
     
-    %% LRPCA
-    
-    Lambdas = fliplr(logspace(-2, 0, 40));
-    %Lambdas = linspace(1, 0, 40)
-    %Lambdas = 0.01;
-    Gammas = [1, 1.5, 2, 5, 10];
-    %Gammas = 10;
-    %Gammas = 10;
-    
-    for l = 1:kfold
-        test_num = l
-        % get lth fold
-        Xtrain = Xtrains{l};
-        Ytrain = Ytrains{l};
-        [ntrain, ~] = size(Ytrain);
-        Xtest = Xtests{l};
-        Ytest = Ytests{l};
-        [ntest, ~] = size(Ytest);
-        
-        %solve
-        for ii = 1:length(Gammas)
-            Gamma = Gammas(ii);
-            for jj = 1:length(Lambdas)
-                Lambda = Lambdas(jj)
-                
-                if jj == 1
-                    [Zlspca, Llspca, B] = lrpca_gamma_lambda(Xtrain, Ytrain, Lambda, Gamma, k, 0);
-                    %[Zlspca, Llspca, B] = ilspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k);
-
-                else
-                    [Zlspca, Llspca, B] = lrpca_gamma_lambda(Xtrain, Ytrain, Lambda, Gamma, k, Llspca');
-                    %[Zlspca, Llspca, B] = ilspca_gamma(Xtrain, Ytrain, Lambda, Gamma, k);
-                end
-                Llspca = Llspca';
-                Ls{l,t,ii, jj} = Llspca;
-                %predict
-                LSPCAXtest = Xtest*Llspca';
-                LSPCAXtrain = Xtrain*Llspca';
-                [~, LSPCAYtest] = max(LSPCAXtest*B(2:end,:) + B(1,:), [], 2);
-                [~, LSPCAYtrain] = max(Xtrain*Llspca'*B(2:end,:) + B(1,:), [], 2);
-                lspca_mbd_test{l,t,ii,jj} =LSPCAXtest;
-                lspca_mbd_train{l,t,ii,jj} = Zlspca;
-                % compute error
-                err = 1 - sum(Ytest == LSPCAYtest) / ntest;
-                train_err = 1 - sum(Ytrain == LSPCAYtrain) / ntrain;                
-                LSPCArates(l,t, ii, jj) = err ;
-                LSPCArates_train(l,t, ii, jj) = train_err;
-                LSPCAvar(l,t, ii, jj) = norm(LSPCAXtest, 'fro') / norm(Xtest, 'fro');
-                LSPCAvar_train(l,t, ii, jj) = norm(Zlspca, 'fro') / norm(Xtrain, 'fro');
-            end
-        end
-    end
-    
-    
-    %% kLRPCA
-    Lambdas = fliplr(logspace(-2, 0, 10));
-    Gammas = [1, 1.5, 2];
-    
-    for l = 1:kfold
-        test_num = l
-        % get lth fold
-        Xtrain = Xtrains{l};
-        Ytrain = Ytrains{l};
-        [ntrain, ~] = size(Ytrain);
-        Xtest = Xtests{l};
-        Ytest = Ytests{l};
-        [ntest, ~] = size(Ytest);
-        
-        for kk = 1:length(sigmas)
-            sigma = sigmas(kk)
-            for ii = 1:length(Gammas)
-                Gamma = Gammas(ii);
-                for jj = 1:length(Lambdas)
-                    Lambda = Lambdas(jj)
-                    
-                    if jj == 1
-                        %[ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, 0);
-                        [ Zklspca, Lorth, B, Klspca] = klrpca_gamma_lambda(Xtrain, Ytrain, Lambda, Gamma, sigma, k, 0, 0);
-                    else
-                        %[ Zklspca, Lorth, B, Klspca] = klspca_gamma(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Klspca);
-                        [ Zklspca, Lorth, B, Klspca] = klrpca_gamma_lambda(Xtrain, Ytrain, Lambda, Gamma, sigma, k, Lorth, Klspca);
-                    end
-                    %Lorth = Lorth';
-                    embedFunc = @(data) klspca_embed(data, Xtrain, Lorth, sigma);
-                    kLs{l,t,ii,jj,kk} = Lorth;
-                    kLSPCAXtest = embedFunc(Xtest);
-                    klspca_mbd_test{l,t,ii,jj,kk} = kLSPCAXtest;
-                    kLSPCAXtrain = Zklspca;
-                    klspca_mbd_train{l,t,ii,jj,kk} = Zklspca;
-                    [~, kLSPCAYtest] = max(kLSPCAXtest*B(2:end,:) + B(1,:), [], 2);
-                    [~, kLSPCAYtrain] = max(Zklspca*B(2:end,:) + B(1,:), [], 2);
-                    err = 1 - sum(Ytest == kLSPCAYtest)/ntest;
-                    train_err = 1 - sum(Ytrain == kLSPCAYtrain)/ntrain;
-                    kLSPCArates(l,t,ii,jj,kk) = err ;
-                    kLSPCArates_train(l,t,ii,jj,kk) = train_err;
-                    kLSPCAvar(l,t,ii,jj,kk) = norm(kLSPCAXtest, 'fro') / norm(gaussian_kernel(Xtest,Xtrain,sigma), 'fro');
-                    kLSPCAvar_train(l,t,ii,jj,kk) = norm(Zklspca, 'fro') / norm(Klspca, 'fro');
-                end
-            end
-        end
-    end
-
     
     %% KPCA
     for l = 1:kfold
@@ -258,6 +116,7 @@ for t = 1:length(ks) %dimensionality of reduced data
         [~, ISPCAYtrain] = max(mnrval(B,Zispca),[], 2);
         % compute error
         ISPCArates(l,t) = 1 - sum(Yhat == Ytest) / ntest;
+        ISPCArates(l,t)
         ISPCArates_train(l,t) = 1 - sum(ISPCAYtrain == Ytrain) / ntrain;
         ISPCAvar(l,t) = norm(Xtest*Lispca', 'fro') / norm(Xtest, 'fro');
         ISPCAvar_train(l,t) = norm(Xtrain*Lispca', 'fro') / norm(Xtrain, 'fro');
@@ -306,6 +165,7 @@ for t = 1:length(ks) %dimensionality of reduced data
         [~,SPPCAYtrain] = max(mnrval(B,Zsppca),[], 2);
         [~,Yhat] = max(mnrval(B,SPPCAXtest),[], 2);
         SPPCArates(l,t) = 1 - sum(Yhat == Ytest) / ntest;
+        SPPCArates(l,t)
         SPPCArates_train(l,t) = 1 - sum(SPPCAYtrain == Ytrain) / ntrain;
         Lsppca_orth = orth(Lsppca'); %normalize latent directions for variation explained comparison
         Lsppca_orth = Lsppca_orth';
@@ -336,6 +196,7 @@ for t = 1:length(ks) %dimensionality of reduced data
             [~,Yhat] = max(mnrval(B,spcaXtest),[], 2);
             %compute error
             SPCArates(l,t) = 1 - sum(Yhat == Ytest) / ntest;
+            SPCArates(l,t)
             [~,SPCAYtrain] = max(mnrval(B,Zspca),[], 2);
             SPCArates_train(l,t) = 1 - sum(SPCAYtrain == Ytrain) / ntrain;
             SPCAvar(l,t) = norm(Xtest*Lspca', 'fro') / norm(Xtest, 'fro');
@@ -526,22 +387,14 @@ for t = 1:length(ks) %dimensionality of reduced data
     
 end
 %% save all data
-save(strcat(dataset, '_results_dim_aao'))
+save(strcat(dataset, '_results_dim_mle_onlyOthers'))
 
 %% compute avg performance accross folds
 
 avgPCA = mean(PCArates);
 avgPCA_train = mean(PCArates_train);
-% avgkPCA = mean(kPCArates);
-% avgkPCA_train = mean(kPCArates_train);
-avgLSPCA = mean(LSPCArates);
-avgLSPCA_train = mean(LSPCArates_train);
-%     lambda_avgLSPCA = mean(lambda_LSPCArates, 1);
-%     lambda_avgLSPCA_train = mean(lambda_LSPCArates_train, 1);
-avgkLSPCA = mean(kLSPCArates);
-avgkLSPCA_train = mean(kLSPCArates_train);
-%     avgILSPCA = mean(ILSPCArates);
-%     avgILSPCA_train = mean(ILSPCArates_train);
+avgkPCA = mean(kPCArates);
+avgkPCA_train = mean(kPCArates_train);
 avgSPCA = mean(SPCArates);
 avgSPCA_train = mean(SPCArates_train);
 avgkSPCA = mean(kSPCArates);
@@ -552,19 +405,13 @@ avgSPPCA = mean(SPPCArates);
 avgSPPCA_train = mean(SPPCArates_train);
 avgLDA = mean(LDArates);
 avgLDA_train = mean(LDArates_train);
-%     avgQDA = mean(QDArates);
-%     avgQDA_train = mean(QDArates_train);
 avgLFDA = mean(LFDArates);
 avgLFDA_train = mean(LFDArates_train);
 avgkLFDA = mean(kLFDArates);
 avgkLFDA_train = mean(kLFDArates_train);
 %
 avgPCAvar = mean(PCAvar);
-% avgkPCAvar = mean(kPCAvar);
-avgLSPCAvar = mean(LSPCAvar);
-%     lambda_avgLSPCAvar = mean(lambda_LSPCAvar);
-avgkLSPCAvar = mean(kLSPCAvar);
-%     avgILSPCAvar = mean(ILSPCAvar);
+avgkPCAvar = mean(kPCAvar);
 avgSPCAvar = mean(SPCAvar);
 avgkSPCAvar = mean(kSPCAvar);
 avgISPCAvar = mean(ISPCAvar);
@@ -574,11 +421,7 @@ avgLFDAvar = mean(LFDAvar);
 avgkLFDAvar = mean(kLFDAvar);
 
 avgPCAvar_train = mean(PCAvar_train);
-% avgkPCAvar_train = mean(kPCAvar_train);
-avgLSPCAvar_train = mean(LSPCAvar_train);
-%     lambda_avgLSPCAvar_train = mean(lambda_LSPCAvar_train);
-avgkLSPCAvar_train = mean(kLSPCAvar_train);
-%     avgILSPCAvar_train = mean(ILSPCAvar_train);
+avgkPCAvar_train = mean(kPCAvar_train);
 avgSPCAvar_train = mean(SPCAvar_train);
 avgkSPCAvar_train = mean(kSPCAvar_train);
 avgISPCAvar_train = mean(ISPCAvar_train);
@@ -599,25 +442,14 @@ sm = std(PCArates(:,kloc));
 sv = std(PCAvar(:,kloc));
 sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
-loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
-[~,kloc,gamloc] = ind2sub(size(avgLSPCA), loc);
+loc = find(avgkPCA==min(avgkPCA,[],'all'),1,'last');
+[~,kloc,sigloc] = ind2sub(size(avgkPCA), loc);
 k = ks(kloc);
-m = mean(LSPCArates(:,kloc,gamloc), 1);
-v = mean(LSPCAvar(:,kloc,gamloc), 1);
-sm = std(LSPCArates(:,kloc,gamloc), 1);
-sv = std(LSPCAvar(:,kloc,gamloc), 1);
-sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
-
-
-loc = find(avgkLSPCA==min(avgkLSPCA,[],'all'),1,'last');
-[~,klock,gamlock,siglock] = ind2sub(size(avgkLSPCA), loc);
-k = ks(klock);
-m = mean(kLSPCArates(:,klock,gamlock,siglock), 1);
-v = mean(kLSPCAvar(:,klock,gamlock,siglock), 1);
-sm = std(kLSPCArates(:,klock,gamlock,siglock), 1);
-sv = std(kLSPCAvar(:,klock,gamlock,siglock), 1);
-sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
-
+m = mean(kSPCArates(:,kloc,sigloc));
+v = mean(kSPCAvar(:,kloc,sigloc));
+sm = std(kSPCArates(:,kloc,sigloc));
+sv = std(kSPCAvar(:,kloc,sigloc));
+sprintf('kPCA: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 loc = find(avgISPCA==min(avgISPCA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgISPCA), loc);

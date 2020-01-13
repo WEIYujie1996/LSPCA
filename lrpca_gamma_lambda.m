@@ -90,7 +90,7 @@ while notConverged
     %% test for overall convergence
     niter = niter+1;
     subspace_discrepancy = 1 - detsim(Lprev', L');
-    if subspace_discrepancy < 1e-16 || niter>1000 || (fstar - fstarprev)^2 < 1e-16
+    if subspace_discrepancy < 1e-8 || niter>1000 || (fstar - fstarprev)^2 < 1e-8
         notConverged = false;
     end
     
@@ -104,7 +104,7 @@ end
 function f = cost_fun(L, B, B0, X, Ymask, Xnorm, n, gamma, lambda)
 tmp = (X*L)*B + B0;
 f1 = lambda*(1/Xnorm^2)*norm(X - gamma^-1 * (X*L)*L', 'fro')^2;
-f2 = -(1/n)^2*(1-lambda)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
+f2 = -(1/n)*(1-lambda)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
 f =  f1 + f2;
 end
 
@@ -119,7 +119,7 @@ for j = 1:numClasses
         xi = Xj(i,:)';
         tmp = xi'*L*B + B0;
         weights = exp(tmp - logsumexp(tmp, 2));
-        dLdij = (1/n)^2*xi*(bj - sum(B.*weights, 2))';
+        dLdij = (1/n)*xi*(bj - sum(B.*weights, 2))';
         g = g - dLdij; % add and repeat for next class
     end
 end

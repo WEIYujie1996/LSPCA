@@ -554,79 +554,79 @@ sprintf('R4: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
 
-% %% print mean performance with std errors for fixed k
-% 
-% kloc = 9;
-% 
-% m = mean(PCArates(:,kloc));
-% v = mean(PCAvar(:,kloc));
-% sm = std(PCArates(:,kloc));
-% sv = std(PCAvar(:,kloc));
-% sprintf('PCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% m = mean(LSPCArates(:,kloc), 1);
-% v = mean(LSPCAvar(:,kloc), 1);
-% sm = std(LSPCArates(:,kloc), 1);
-% sv = std(LSPCAvar(:,kloc), 1);
-% sprintf('LSPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% 
-% loc = find(avgkLSPCA(:,kloc,:)==min(avgkLSPCA(:,kloc,:),[],'all'),1,'last');
-% [~,~,sigloc] = ind2sub(size(avgkLSPCA(:,kloc,:)), loc);
-% m = mean(kLSPCArates(:,kloc,sigloc), 1);
-% v = mean(kLSPCAvar(:,kloc,sigloc), 1);
-% sm = std(kLSPCArates(:,kloc,sigloc), 1);
-% sv = std(kLSPCAvar(:,kloc,sigloc), 1);
-% sprintf('kLSPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% 
-% m = mean(ISPCArates(:,kloc));
-% v = mean(ISPCAvar(:,kloc));
-% sm = std(ISPCArates(:,kloc));
-% sv = std(ISPCAvar(:,kloc));
-% sprintf('ISPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% m = mean(SPPCArates(:,kloc));
-% v = mean(SPPCAvar(:,kloc));
-% sm = std(SPPCArates(:,kloc));
-% sv = std(SPPCAvar(:,kloc));
-% sprintf('SPPCAerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% m = mean(SPCArates(:,kloc));
-% v = mean(SPCAvar(:,kloc));
-% sm = std(SPCArates(:,kloc));
-% sv = std(SPCAvar(:,kloc));
-% sprintf('Barshanerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% loc = find(avgkSPCA(:,kloc,:)==min(avgkSPCA(:,kloc,:),[],'all'),1,'last');
-% [~,~,sigloc] = ind2sub(size(avgkSPCA(:,kloc,:)), loc);
-% m = mean(kSPCArates(:,kloc,sigloc));
-% v = mean(kSPCAvar(:,kloc,sigloc));
-% sm = std(kSPCArates(:,kloc,sigloc));
-% sv = std(kSPCAvar(:,kloc,sigloc));
-% sprintf('kBarshanerr: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% 
-% m = mean(SSVDrates(:,kloc));
-% v = mean(SSVDvar(:,kloc));
-% sm = std(SSVDrates(:,kloc));
-% sv = std(SSVDvar(:,kloc));
-% sprintf('SSVD: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% loc = 1; % RRR with parameter value 0
-% m = mean(ridge_rrr_rates(:,kloc,loc), 1);
-% v = mean(ridge_rrrvars(:,kloc,loc), 1);
-% sm = std(ridge_rrr_rates(:,kloc,loc), 1);
-% sv = std(ridge_rrrvars(:,kloc,loc), 1);
-% sprintf('RRR: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
-% 
-% loc = find(avgR4(:,kloc,:)==min(avgR4(:,kloc,:),[],'all'),1,'last');
-% [~,~,locr4] = ind2sub(size(avgR4(:,kloc,:)), loc);
-% m = mean(ridge_rrr_rates(:,kloc,locr4), 1);
-% v = mean(ridge_rrrvars(:,kloc,locr4), 1);
-% sm = std(ridge_rrr_rates(:,kloc,locr4), 1);
-% sv = std(ridge_rrrvars(:,kloc,locr4), 1);
-% sprintf('R4: $%0.3f \\pm %0.3f $ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+%% print mean performance with std errors for fixed k
+
+k=2;
+kloc = 1;
+
+m = mean(PCArates(:,kloc));
+v = mean(PCAvar(:,kloc));
+sm = std(PCArates(:,kloc));
+sv = std(PCAvar(:,kloc));
+sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+m = mean(LSPCArates(:,kloc), 1);
+v = mean(LSPCAvar(:,kloc), 1);
+sm = std(LSPCArates(:,kloc), 1);
+sv = std(LSPCAvar(:,kloc), 1);
+sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+loc = find(avgkLSPCA(:,kloc,:)==min(avgkLSPCA(:,kloc,:),[],'all'),1,'last');
+[~,~,sigloc] = ind2sub(size(avgkLSPCA(:,kloc,:)), loc);
+m = mean(kLSPCArates(:,kloc,sigloc), 1);
+v = mean(kLSPCAvar(:,kloc,sigloc), 1);
+sm = std(kLSPCArates(:,kloc,sigloc), 1);
+sv = std(kLSPCAvar(:,kloc,sigloc), 1);
+sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+
+m = mean(ISPCArates(:,kloc));
+v = mean(ISPCAvar(:,kloc));
+sm = std(ISPCArates(:,kloc));
+sv = std(ISPCAvar(:,kloc));
+sprintf('ISPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+m = mean(SPPCArates(:,kloc));
+v = mean(SPPCAvar(:,kloc));
+sm = std(SPPCArates(:,kloc));
+sv = std(SPPCAvar(:,kloc));
+sprintf('SPPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+m = mean(SPCArates(:,kloc));
+v = mean(SPCAvar(:,kloc));
+sm = std(SPCArates(:,kloc));
+sv = std(SPCAvar(:,kloc));
+sprintf('Barshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+loc = find(avgkSPCA(:,kloc,:)==min(avgkSPCA(:,kloc,:),[],'all'),1,'last');
+[~,~,sigloc] = ind2sub(size(avgkSPCA(:,kloc,:)), loc);
+m = mean(kSPCArates(:,kloc,sigloc));
+v = mean(kSPCAvar(:,kloc,sigloc));
+sm = std(kSPCArates(:,kloc,sigloc));
+sv = std(kSPCAvar(:,kloc,sigloc));
+sprintf('kBarshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+
+m = mean(SSVDrates(:,kloc));
+v = mean(SSVDvar(:,kloc));
+sm = std(SSVDrates(:,kloc));
+sv = std(SSVDvar(:,kloc));
+sprintf('SSVD: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+loc = 1; % RRR with parameter value 0
+m = mean(ridge_rrr_rates(:,kloc,loc), 1);
+v = mean(ridge_rrrvars(:,kloc,loc), 1);
+sm = std(ridge_rrr_rates(:,kloc,loc), 1);
+sv = std(ridge_rrrvars(:,kloc,loc), 1);
+sprintf('RRR: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+
+loc = find(avgR4(:,kloc,:)==min(avgR4(:,kloc,:),[],'all'),1,'last');
+[~,~,locr4] = ind2sub(size(avgR4(:,kloc,:)), loc);
+m = mean(ridge_rrr_rates(:,kloc,locr4), 1);
+v = mean(ridge_rrrvars(:,kloc,locr4), 1);
+sm = std(ridge_rrr_rates(:,kloc,locr4), 1);
+sv = std(ridge_rrrvars(:,kloc,locr4), 1);
+sprintf('R4: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
 %%% plot error - var tradeoff curves

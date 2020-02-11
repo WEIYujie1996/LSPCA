@@ -101,13 +101,13 @@ for t = 1:length(ks) %dimensionality of reduced data
     
     %% LRPCA
     
-    Lambdas = fliplr(logspace(-2, 0, 40));
+    Lambdas = fliplr(logspace(-3, 0, 20));
     %Lambdas = linspace(1, 0, 40)
     %Lambdas = 0.01;
     Gammas = [1, 1.5, 2, 5, 10];
     %Gammas = 10;
     %Gammas = 10;
-    
+    %k=2
     for l = 1:kfold
         test_num = l
         % get lth fold
@@ -154,9 +154,9 @@ for t = 1:length(ks) %dimensionality of reduced data
     
     
     %% kLRPCA
-    Lambdas = fliplr(logspace(-2, 0, 10));
-    Gammas = [1, 1.5, 2];
-    
+    Lambdas = fliplr(logspace(-3, 0, 20));
+     Gammas = [1, 1.5, 2, 5, 10];
+    %k=2
     for l = 1:kfold
         test_num = l
         % get lth fold
@@ -531,40 +531,34 @@ save(strcat(dataset, '_results_dim_aao'))
 %% compute avg performance accross folds
 
 avgPCA = mean(PCArates);
-avgPCA_train = mean(PCArates_train);
-% avgkPCA = mean(kPCArates);
-% avgkPCA_train = mean(kPCArates_train);
+%avgPCA_train = mean(PCArates_train);
+avgkPCA = mean(kPCArates);
+%avgkPCA_train = mean(kPCArates_train);
 avgLSPCA = mean(LSPCArates);
 avgLSPCA_train = mean(LSPCArates_train);
-%     lambda_avgLSPCA = mean(lambda_LSPCArates, 1);
-%     lambda_avgLSPCA_train = mean(lambda_LSPCArates_train, 1);
 avgkLSPCA = mean(kLSPCArates);
 avgkLSPCA_train = mean(kLSPCArates_train);
-%     avgILSPCA = mean(ILSPCArates);
-%     avgILSPCA_train = mean(ILSPCArates_train);
 avgSPCA = mean(SPCArates);
-avgSPCA_train = mean(SPCArates_train);
+%avgSPCA_train = mean(SPCArates_train);
 avgkSPCA = mean(kSPCArates);
-avgkSPCA_train = mean(kSPCArates_train);
+%avgkSPCA_train = mean(kSPCArates_train);
 avgISPCA = mean(ISPCArates);
-avgISPCA_train = mean(ISPCArates_train);
+%avgISPCA_train = mean(ISPCArates_train);
 avgSPPCA = mean(SPPCArates);
-avgSPPCA_train = mean(SPPCArates_train);
+%avgSPPCA_train = mean(SPPCArates_train);
 avgLDA = mean(LDArates);
-avgLDA_train = mean(LDArates_train);
+%avgLDA_train = mean(LDArates_train);
 %     avgQDA = mean(QDArates);
 %     avgQDA_train = mean(QDArates_train);
 avgLFDA = mean(LFDArates);
-avgLFDA_train = mean(LFDArates_train);
+%avgLFDA_train = mean(LFDArates_train);
 avgkLFDA = mean(kLFDArates);
-avgkLFDA_train = mean(kLFDArates_train);
-%
+%avgkLFDA_train = mean(kLFDArates_train);
+
 avgPCAvar = mean(PCAvar);
-% avgkPCAvar = mean(kPCAvar);
+avgkPCAvar = mean(kPCAvar);
 avgLSPCAvar = mean(LSPCAvar);
-%     lambda_avgLSPCAvar = mean(lambda_LSPCAvar);
 avgkLSPCAvar = mean(kLSPCAvar);
-%     avgILSPCAvar = mean(ILSPCAvar);
 avgSPCAvar = mean(SPCAvar);
 avgkSPCAvar = mean(kSPCAvar);
 avgISPCAvar = mean(ISPCAvar);
@@ -572,115 +566,111 @@ avgSPPCAvar = mean(SPPCAvar);
 avgLDAvar = mean(LDAvar);
 avgLFDAvar = mean(LFDAvar);
 avgkLFDAvar = mean(kLFDAvar);
-
-avgPCAvar_train = mean(PCAvar_train);
+% 
+% avgPCAvar_train = mean(PCAvar_train);
 % avgkPCAvar_train = mean(kPCAvar_train);
 avgLSPCAvar_train = mean(LSPCAvar_train);
-%     lambda_avgLSPCAvar_train = mean(lambda_LSPCAvar_train);
 avgkLSPCAvar_train = mean(kLSPCAvar_train);
-%     avgILSPCAvar_train = mean(ILSPCAvar_train);
-avgSPCAvar_train = mean(SPCAvar_train);
-avgkSPCAvar_train = mean(kSPCAvar_train);
-avgISPCAvar_train = mean(ISPCAvar_train);
-avgSPPCAvar_train = mean(SPPCAvar_train);
-avgLDAvar_train = mean(LDAvar_train);
-avgLFDAvar_train = mean(LFDAvar_train);
-avgkLFDAvar_train = mean(kLFDAvar_train);
+% avgSPCAvar_train = mean(SPCAvar_train);
+% avgkSPCAvar_train = mean(kSPCAvar_train);
+% avgISPCAvar_train = mean(ISPCAvar_train);
+% avgSPPCAvar_train = mean(SPPCAvar_train);
+% avgLDAvar_train = mean(LDAvar_train);
+% avgLFDAvar_train = mean(LFDAvar_train);
+% avgkLFDAvar_train = mean(kLFDAvar_train);
 
 %% print mean performance with std errors
-
-
 loc = find(avgPCA==min(avgPCA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgPCA), loc);
-k = ks(kloc);
+kpca = ks(kloc);
 m = mean(PCArates(:,kloc));
 v = mean(PCAvar(:,kloc));
 sm = std(PCArates(:,kloc));
 sv = std(PCAvar(:,kloc));
-sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kpca, v, sv)
 
 loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
-[~,kloc,gamloc] = ind2sub(size(avgLSPCA), loc);
-k = ks(kloc);
-m = mean(LSPCArates(:,kloc,gamloc), 1);
-v = mean(LSPCAvar(:,kloc,gamloc), 1);
-sm = std(LSPCArates(:,kloc,gamloc), 1);
-sv = std(LSPCAvar(:,kloc,gamloc), 1);
-sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+[~,kloc,gamloc,lamloc] = ind2sub(size(avgLSPCA), loc);
+klspca = ks(kloc);
+m = mean(LSPCArates(:,kloc,gamloc,lamloc), 1);
+v = mean(LSPCAvar(:,kloc,gamloc,lamloc), 1);
+sm = std(LSPCArates(:,kloc,gamloc,lamloc), 1);
+sv = std(LSPCAvar(:,kloc,gamloc,lamloc), 1);
+sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, klspca, v, sv)
 
 
 loc = find(avgkLSPCA==min(avgkLSPCA,[],'all'),1,'last');
-[~,klock,gamlock,siglock] = ind2sub(size(avgkLSPCA), loc);
-k = ks(klock);
-m = mean(kLSPCArates(:,klock,gamlock,siglock), 1);
-v = mean(kLSPCAvar(:,klock,gamlock,siglock), 1);
-sm = std(kLSPCArates(:,klock,gamlock,siglock), 1);
-sv = std(kLSPCAvar(:,klock,gamlock,siglock), 1);
-sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+[~,klock,gamlock,lamlock,siglock] = ind2sub(size(avgkLSPCA), loc);
+kklspca = ks(klock);
+m = mean(kLSPCArates(:,klock,gamlock,lamlock,siglock), 1, 'omitnan');
+v = mean(kLSPCAvar(:,klock,gamlock,lamlock,siglock), 1, 'omitnan');
+sm = std(kLSPCArates(:,klock,gamlock,lamlock,siglock), 1);
+sv = std(kLSPCAvar(:,klock,gamlock,lamlock,siglock), 1);
+sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kklspca, v, sv)
 
 
 loc = find(avgISPCA==min(avgISPCA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgISPCA), loc);
-k = ks(kloc);
+kispca = ks(kloc);
 m = mean(ISPCArates(:,kloc));
 v = mean(ISPCAvar(:,kloc));
 sm = std(ISPCArates(:,kloc));
 sv = std(ISPCAvar(:,kloc));
-sprintf('ISPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('ISPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kispca, v, sv)
 
 loc = find(avgSPPCA==min(avgSPPCA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgSPPCA), loc);
-k = ks(kloc);
+ksppca = ks(kloc);
 m = mean(SPPCArates(:,kloc));
 v = mean(SPPCAvar(:,kloc));
 sm = std(SPPCArates(:,kloc));
 sv = std(SPPCAvar(:,kloc));
-sprintf('SPPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('SPPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, ksppca, v, sv)
 
 loc = find(avgSPCA==min(avgSPCA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgSPCA), loc);
-k = ks(kloc);
+kspca = ks(kloc);
 m = mean(SPCArates(:,kloc));
 v = mean(SPCAvar(:,kloc));
 sm = std(SPCArates(:,kloc));
 sv = std(SPCAvar(:,kloc));
-sprintf('Barshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('Barshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kspca, v, sv)
 
 loc = find(avgkSPCA==min(avgkSPCA,[],'all'),1,'last');
 [~,kloc,sigloc] = ind2sub(size(avgkSPCA), loc);
-k = ks(kloc);
+kkspca = ks(kloc);
 m = mean(kSPCArates(:,kloc,sigloc));
 v = mean(kSPCAvar(:,kloc,sigloc));
 sm = std(kSPCArates(:,kloc,sigloc));
 sv = std(kSPCAvar(:,kloc,sigloc));
-sprintf('kBarshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('kBarshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kkspca, v, sv)
 
 loc = find(avgLDA==min(avgLDA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgLDA), loc);
-k = ks(kloc);
+klda = ks(kloc);
 m = mean(LDArates(:,kloc));
 v = mean(LDAvar(:,kloc));
 sm = std(LDArates(:,kloc));
 sv = std(LDAvar(:,kloc));
-sprintf('LDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('LDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, klda, v, sv)
 
 loc = find(avgLFDA==min(avgLFDA,[],'all'),1,'last');
 [~,kloc] = ind2sub(size(avgLFDA), loc);
-k = ks(kloc);
+klfda = ks(kloc);
 m = mean(LFDArates(:,kloc));
 v = mean(LFDAvar(:,kloc));
 sm = std(LFDArates(:,kloc));
 sv = std(LFDAvar(:,kloc));
-sprintf('LFDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('LFDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, klfda, v, sv)
 
 loc = find(avgkLFDA==min(avgkLFDA,[],'all'),1,'last');
 [~,kloc,sigloc] = ind2sub(size(avgkLFDA), loc);
-k = ks(kloc);
+kklfda = ks(kloc);
 m = mean(kLFDArates(:,kloc,sigloc));
 v = mean(kLFDAvar(:,kloc,sigloc));
 sm = std(kLFDArates(:,kloc,sigloc));
 sv = std(kLFDAvar(:,kloc,sigloc));
-sprintf('kLFDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+sprintf('kLFDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, kklfda, v, sv)
 
 %% print mean performance with std errors for k=2
 k = 2;
@@ -762,71 +752,192 @@ sprintf('kLFDAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v
 
 
 %% plot error - var tradeoff curves
+%avgLSPCA_train = avgLSPCA_train(:,:,1:5,:);
+%avgLSPCAvar_train = avgLSPCAvar_train(:,:,1:5,:);
+
+kloc = find(ks==klspca);
+t = kloc;
+temp = avgLSPCA(:,t,:,:);
+temp = reshape(temp, [length(Gammas), length(Lambdas)]);
+%temp_train = reshape(avgLSPCA_train(:,t,:,:), [length(Gammas), length(Lambdas)]);
+tempv = avgLSPCAvar(:,t,:,:);
+tempv = reshape(tempv, [length(Gammas), length(Lambdas)]);
+%tempv_train = reshape(avgLSPCAvar_train(:,t,:,:), [length(Gammas), length(Lambdas)]);
+[mLSPCA, I] = min(temp);
+I = sub2ind(size(temp),I,1:length(I));
+vLSPCA = tempv(I);
+%mLSPCA_train = temp_train(I);
+%vLSPCA_train = tempv_train(I);
+
+kloc = find(ks==kklspca);
+t = kloc;
+temp = avgkLSPCA(:,t,:,:,:);
+temp = reshape(temp, [length(Gammas), length(Lambdas), length(sigmas)]);
+%temp_train = reshape(avgkLSPCA_train(:,t,:,:), [length(Gammas), length(Lambdas), length(sigmas)]);
+tempv = avgkLSPCAvar(:,t,:,:,:);
+tempv = reshape(tempv, [length(Gammas), length(Lambdas), length(sigmas)]);
+%tempv_train = reshape(avgkLSPCAvar_train(:,t,:,:), [length(Gammas), length(Lambdas), length(sigmas)]);
+[res, I1] = min(temp, [], 1);
+[~,a,b] = size(I1);
+for i=1:a
+    for j=1:b
+   tempvv(i,j) = tempv(I1(1,i,j),i,j);
+%    tempmm_train(i,j) = temp_train(I1(1,i,j),i,j);
+%    tempvv_train(i,j) = tempv_train(I1(1,i,j),i,j);   
+    end
+end
+[mkLSPCA, I2] = min(res, [], 3);
+[~,c] = size(I2);
+for i=1:c
+    vkLSPCA(i) = tempvv(i,10);
+%     mkLSPCA_train(i) = tempmm_train(i,I2(1,i));
+%     vkLSPCA_train(i) = tempvv_train(i,I2(1,i));
+end
+%     gamloc = 3;
+%     gamlock = 3;
+    figure()
+    hold on
+     plot(avgPCAvar(1,kpca-1), avgPCA(1,kpca-1), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+    %plot(avgkPCAvar_train(1,t), avgkPCA(1,t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(vLSPCA(:), mLSPCA(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    % plot(lambda_avgLSPCAvar_train(1,t,:), lambda_avgLSPCA(1,t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    plot(vkLSPCA(:), mkLSPCA(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    plot(avgISPCAvar(1,kispca-1), avgISPCA(1,kispca-1), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgSPPCAvar(1,ksppca-1), avgSPPCA(1,ksppca-1), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgSPCAvar(1,kspca-1), avgSPCA(1,kspca-1), '+', 'MarkerSize', 20, 'LineWidth', 2)
+    loc = find(avgkSPCA(:,kkspca-1,:)==min(avgkSPCA(:,kkspca-1,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkSPCA(:,kkspca-1,:)), loc);
+    plot(avgkSPCAvar(1,kkspca-1,sigloc), avgkSPCA(1,kkspca-1,sigloc), '>', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgLDAvar(klda-1), avgLDA(klda-1), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+    % plot([0,1], [1,1]*avgQDA(t), ':', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgLFDAvar(klfda-1), avgLFDA(klfda-1), '^', 'MarkerSize', 20, 'LineWidth', 2)
+    loc = find(avgkLFDA(:,kklfda-1,:)==min(avgkLFDA(:,kklfda-1,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkLFDA(:,kklfda-1,:)), loc);
+    plot(avgkLFDAvar(1,kklfda-1,sigloc), avgkLFDA(1,kklfda-1,sigloc), '<', 'MarkerSize', 20, 'LineWidth', 2)
+    
+    %plot([0,1], avgLR*[1,1], 'k', 'LineWidth', 4)
+    
+    %xlabel('Variation Explained', 'fontsize', 25)
+    %title('Test', 'fontsize', 25)
+    %ylabel('Classification Error', 'fontsize', 25)
+    %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+    set(gca, 'fontsize', 25)
+    lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', ...
+        'LDA', 'LFDA', 'kLFDA', 'Location', 'best'); lgd.FontSize = 25;
+    xlim([0,1.01])
+    %ylim([0,0.5])
+    %saveas(gcf, strcat(dataset, 'multi_obj.jpg'))
+    
+     %% add MLE results to plot
+    avgLSPCA = mean(LSPCArates, 1);
+    avgLSPCA_train = mean(LSPCArates_train, 1);
+    avgkLSPCA = mean(kLSPCArates, 1);
+    avgkLSPCA_train = mean(kLSPCArates_train, 1);
+    avgLSPCAvar = mean(LSPCAvar, 1);
+    avgkLSPCAvar = mean(kLSPCAvar, 1);
+    avgLSPCAvar_train = mean(LSPCAvar_train, 1);
+    avgkLSPCAvar_train = mean(kLSPCAvar_train, 1);
+    
+    
+    %%
+    hold on
+    loc = find(avgLSPCA == min(avgLSPCA, [], 'all'));
+    plot(avgLSPCAvar(loc), avgLSPCA(loc), 'b*', 'LineWidth', 2, 'MarkerSize', 20)
+    %%
+    hold on
+    loc = find(avgkLSPCA == min(avgkLSPCA, [], 'all'), 1, 'last');
+    plot(avgkLSPCAvar(loc), avgkLSPCA(loc), 'r*', 'LineWidth', 2, 'MarkerSize', 20)
+    lgd = legend('PCA', 'LSPCA (CV)', 'kLSPCA (CV)', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', ...
+        'LDA', 'LFDA', 'kLFDA', 'LSPCA (MLE)', 'kLSPCA (MLE)', 'Location', 'best'); lgd.FontSize = 25;    
+    
+
+% 
+ %% plot error - var tradeoff curves
+ kloc = 1;
+t = kloc;
+temp = avgLSPCA(:,t,:,:);
+temp = reshape(temp, [length(Gammas), length(Lambdas)]);
+temp_train = reshape(avgLSPCA_train(:,t,:,:), [length(Gammas), length(Lambdas)]);
+tempv = avgLSPCAvar(:,t,:,:);
+tempv = reshape(tempv, [length(Gammas), length(Lambdas)]);
+tempv_train = reshape(avgLSPCAvar_train(:,t,:,:), [length(Gammas), length(Lambdas)]);
+[mLSPCA, I] = min(temp);
+I = sub2ind(size(temp),I,1:length(I));
+vLSPCA = tempv(I);
+mLSPCA_train = temp_train(I);
+vLSPCA_train = tempv_train(I);
+
+
+temp = avgkLSPCA(:,t,:,:);
+temp = reshape(temp, [length(Gammas), length(Lambdas), length(sigmas)]);
+temp_train = reshape(avgkLSPCA_train(:,t,:,:), [length(Gammas), length(Lambdas), length(sigmas)]);
+tempv = avgkLSPCAvar(:,t,:,:);
+tempv = reshape(tempv, [length(Gammas), length(Lambdas), length(sigmas)]);
+tempv_train = reshape(avgkLSPCAvar_train(:,t,:,:), [length(Gammas), length(Lambdas), length(sigmas)]);
+[res, I1] = min(temp, [], 1);
+[~,a,b] = size(I1);
+for i=1:a
+    for j=1:b
+   tempvv(i,j) = tempv(I1(1,i,j),i,j);
+   tempmm_train(i,j) = temp_train(I1(1,i,j),i,j);
+   tempvv_train(i,j) = tempv_train(I1(1,i,j),i,j);   
+    end
+end
+[mkLSPCA, I2] = min(res, [], 3);
+[~,c] = size(I2);
+for i=1:c
+    vkLSPCA(i) = tempvv(i,I2(1,i));
+    mkLSPCA_train(i) = tempmm_train(i,I2(1,i));
+    vkLSPCA_train(i) = tempvv_train(i,I2(1,i));
+end
 % 
 % for t = 1:length(ks)
-%     figure()
-%     hold on
-%     plot(avgPCAvar(t), avgPCA(t), 'sb', 'MarkerSize', 20, 'LineWidth', 2)
-%     %plot(avgkPCAvar_train(t), avgkPCA(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-%     %plot(avgkLSPCAvar_train(t,1), avgkLSPCA(t, 1), 'sr', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgLSPCAvar(t,:), avgLSPCA(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     % plot(avgILSPCAvar_train(t,:), avgILSPCA(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     % plot(lambda_avgLSPCAvar_train(t,:), lambda_avgLSPCA(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgkLSPCAvar(t,1:end-1,siglock), avgkLSPCA(t, 1:end-1,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgISPCAvar(t), avgISPCA(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgSPPCAvar(t), avgSPPCA(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgSPCAvar(t), avgSPCA(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgkSPCAvar(t,locb), avgkSPCA(t,locb), '>', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgLDAvar(t), avgLDA(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-%     % plot([0,1], [1,1]*avgQDA(t), ':', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgLFDAvar(t), avgLFDA(t), '^', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgkLFDAvar(t,locl), avgkLFDA(t,locl), '<', 'MarkerSize', 20, 'LineWidth', 2)
-%     
-%     %plot([0,1], avgLR*[1,1], 'k', 'LineWidth', 4)
-%     
-%     %xlabel('Variation Explained', 'fontsize', 25)
-%     %title('Test', 'fontsize', 25)
-%     %ylabel('Classification Error', 'fontsize', 25)
-%     %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
-%     set(gca, 'fontsize', 25)
-%     lgd = legend('PCA', 'LSPCA', 'KLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', ...
-%         'LDA', 'LFDA', 'kLFDA', 'Location', 'best'); lgd.FontSize = 15;
-%     xlim([0,1.01])
-%     %ylim([0,0.5])
-%     saveas(gcf, strcat(dataset, 'multi_obj.jpg'))
-% end
-% 
-% %% plot error - var tradeoff curves
-% 
-% for t = 1:length(ks)
-%     figure()
-%     hold on
-%     plot(avgPCAvar_train(t), avgPCA_train(t), 'sb', 'MarkerSize', 20, 'LineWidth', 2)
-%     % plot(avgkPCAvar_train(t), avgkPCA_train(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-%     %plot(avgkLSPCAvar_train(t,1), avgkLSPCA_train(t, 1), 'sr', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgLSPCAvar_train(t,:), avgLSPCA_train(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     % plot(avgILSPCAvar_train(t,:), avgILSPCA_train(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     % plot(lambda_avgLSPCAvar_train(t,:), lambda_avgLSPCA_train(t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgkLSPCAvar_train(t,1:end-2,siglock), avgkLSPCA_train(t, 1:end-2,siglock), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-%     plot(avgISPCAvar_train(t), avgISPCA_train(t), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgSPPCAvar_train(t), avgSPPCA_train(t), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgSPCAvar_train(t), avgSPCA_train(t), '+', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgkSPCAvar_train(t,locb), avgkSPCA_train(t,locb), '>', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgLDAvar_train(t), avgLDA_train(t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-%     %plot([0,1], [1,1]*avgQDA_train(t), ':', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgLFDAvar_train(t), avgLFDA_train(t), '^', 'MarkerSize', 20, 'LineWidth', 2)
-%     plot(avgkLFDAvar_train(t,locl), avgkLFDA_train(t,locl), '<', 'MarkerSize', 20, 'LineWidth', 2)
-%     
-%     %plot([0,1], avgLR*[1,1], 'k', 'LineWidth', 4)
-%     
-%     xlabel('Variation Explained', 'fontsize', 25)
-%     %title('Train', 'fontsize', 25)
-%     ylabel('Classification Error', 'fontsize', 25)
-%     %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
-%     set(gca, 'fontsize', 25)
-%     lgd = legend('PCA', 'LSPCA', 'KLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', ...
-%         'LDA', 'LFDA', 'kLFDA', 'Location', 'best'); lgd.FontSize = 15;
-%     xlim([0,1.01])
+        figure()
+    hold on
+     plot(avgPCAvar_train(1,kpca-1), avgPCA_train(1,kpca-1), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+    %plot(avgkPCAvar_train(1,t), avgkPCA(1,t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(vLSPCA_train(:), mLSPCA_train(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    % plot(lambda_avgLSPCAvar_train(1,t,:), lambda_avgLSPCA(1,t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    plot(vkLSPCA_train(:), mkLSPCA_train(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+    plot(avgISPCAvar_train(1,kispca-1), avgISPCA_train(1,kispca-1), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgSPPCAva_trainr(1,ksppca-1), avgSPPCA_train(1,ksppca-1), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgSPCAvar_train(1,kspca-1), avgSPCA_train(1,kspca-1), '+', 'MarkerSize', 20, 'LineWidth', 2)
+    loc = find(avgkSPCA(:,kkspca-1,:)==min(avgkSPCA(:,kkspca-1,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkSPCA(:,kkspca-1,:)), loc);
+    plot(avgkSPCAvar_train(1,kkspca-1,sigloc), avgkSPCA_train(1,kkspca-1,sigloc), '>', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgLDAvar_train(klda), avgLDA_train(klda), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+    % plot([0,1], [1,1]*avgQDA(t), ':', 'MarkerSize', 20, 'LineWidth', 2)
+    plot(avgLFDAvar_train(klfda), avgLFDA_train(klfda), '^', 'MarkerSize', 20, 'LineWidth', 2)
+    loc = find(avgkLFDA(:,klfda,:)==min(avgkLFDA(:,klfda,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkLFDA(:,klfda,:)), loc);
+    plot(avgkLFDAvar_train(1,klfda,sigloc), avgkLFDA_train(1,klfda,sigloc), '<', 'MarkerSize', 20, 'LineWidth', 2)
+    
+    %plot([0,1], avgLR*[1,1], 'k', 'LineWidth', 4)
+    
+    xlabel('Variation Explained', 'fontsize', 25)
+    %title('Train', 'fontsize', 25)
+    ylabel('Classification Error', 'fontsize', 25)
+    %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+    set(gca, 'fontsize', 25)
+    lgd = legend('PCA', 'LSPCA', 'KLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', ...
+        'LDA', 'LFDA', 'kLFDA', 'Location', 'best'); lgd.FontSize = 15;
+    
+     %% add MLE results to plot
+ %% add MLE results to plot
+    avgLSPCA = mean(LSPCArates, 1);
+    avgLSPCA_train = mean(LSPCArates_train, 1);
+    avgkLSPCA = mean(kLSPCArates, 1);
+    avgkLSPCA_train = mean(kLSPCArates_train, 1);
+    avgLSPCAvar = mean(LSPCAvar, 1);
+    avgkLSPCAvar = mean(kLSPCAvar, 1);
+    avgLSPCAvar_train = mean(LSPCAvar_train, 1);
+    avgkLSPCAvar_train = mean(kLSPCAvar_train, 1);
+    hold on
+    plot(avgLSPCAvar_train(klspca-1), avgLSPCA_train(klspca-1), 'b*', 'LineWidth', 2, 'MarkerSize', 20)
+    [m, loc] = min(avgkLSPCA_train(1,kklspca-1,:));
+    plot(avgkLSPCAvar_train(1,kklspca-1,loc), m, 'r*', 'LineWidth', 2, 'MarkerSize', 20)
+    lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'LSPCA (CV)', 'kLSPCA (CV)', 'Location', 'best'); lgd.FontSize = 15;
+        %     xlim([0,1.01])
 %     saveas(gcf, strcat(dataset, 'multi_obj_train.jpg'))
 % end
 % 

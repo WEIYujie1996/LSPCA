@@ -1,13 +1,13 @@
-%% BarshA
-clear; clc;
-rng(0);
-warning('off','all');
-dataset = 'BarshanRegressionData_A';
-sigmamin = 0.01; smin = 0.05; sigmamax = 3; smax = 0.90;
-% generate sigmas for kernel methods
-numsigmas = 10;
-sigmas = linspace(sigmamin, sigmamax, numsigmas);
-run RegressionComparison_cv_dim.m
+% %% BarshA
+% clear; clc;
+% rng(0);
+% warning('off','all');
+% dataset = 'BarshanRegressionData_A';
+% sigmamin = 0.01; smin = 0.05; sigmamax = 3; smax = 0.90;
+% % generate sigmas for kernel methods
+% numsigmas = 10;
+% sigmas = linspace(sigmamin, sigmamax, numsigmas);
+% run RegressionComparison_cv_dim.m
 
 %% Residential
 clear; clc;
@@ -33,16 +33,16 @@ run RegressionComparison_cv_dim.m
 
 
 
-% %% DLBCL
-% clear; clc;
-% rng(0);
-% warning('off','all');
-% dataset = 'DLBCL';
-% sigmamin = 18; smin = 0.95; sigmamax = 200; smax = 0.67;
-% % generate sigmas for kernel methods
-% numsigmas = 10;
-% sigmas = linspace(sigmamin, sigmamax, numsigmas);
-% run RegressionComparison_cv_dim.m
+%% DLBCL
+clear; clc;
+rng(0);
+warning('off','all');
+dataset = 'DLBCL';
+sigmamin = 18; smin = 0.95; sigmamax = 200; smax = 0.67;
+% generate sigmas for kernel methods
+numsigmas = 10;
+sigmas = linspace(sigmamin, sigmamax, numsigmas);
+run RegressionComparison_cv_dim.m
 
 % %% BarshB
 % clear; clc;

@@ -55,9 +55,10 @@ Binit = mnrfit(X*L,Ymask, 'interactions', 'on');
 Binit = [Binit, zeros(k+1,1)];
 B0 = Binit(1,:);
 B = Binit(2:end,:);
-%var_x = (n*(p-k))^-1 * ((norm(X, 'fro')^2-norm(X*L, 'fro')^2));
-var_x = (n*p)^-1 * norm(X, 'fro')^2;
+var_x = (n*(p-k))^-1 * ((norm(X, 'fro')^2-norm(X*L, 'fro')^2));
 alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+eta = sqrt(var_x + alpha) - sqrt(var_x);
+gamma = (var_x + eta) / eta;
 niter = 0;
 notConverged = true;
 fstar = inf;
@@ -73,11 +74,10 @@ while notConverged
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
     problem.cost  = @(Ltilde) cost_fun(Ltilde, B, B0, X, Ymask, Xnorm, n, p, k, var_x, alpha);
-    problem.egrad = @(Ltilde) Lgrad(Ltilde, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, alpha);
+    problem.egrad = @(Ltilde) Lgrad(Ltilde, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, gamma);
     options.verbosity = 0;
     %options.minstepsize = 1e-12;
     options.stopfun = @mystopfun;
-    options.maxiter = 2000;
     [L, fstar, ~, options] = conjugategradient(problem, L, options);
     %[L, fstar, ~, options] = steepestdescent(problem, L, options);
 
@@ -94,10 +94,10 @@ while notConverged
         var_x = (n*p)^-1 * norm(X, 'fro')^2;
     end
     
-    
     %% update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
-
+    eta = sqrt(var_x + alpha) - sqrt(var_x);
+    gamma = (var_x + eta) / eta;
     
     %% test for overall convergence
     niter = niter+1;
@@ -119,11 +119,11 @@ end
 function f = cost_fun(L, B, B0, X, Ymask, Xnorm, n, p, k, var_x, alpha)
 tmp = (X*L)*B + B0;
 f1 = (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha));
-f2 = -2*(1/n)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
+f2 = -(2/n)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
 f =  f1 + f2;
 end
 
-function g = Lgrad(L, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, alpha)
+function g = Lgrad(L, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, gamma)
 g = zeros(p,k);
 for j = 1:numClasses
     Xj = X(Y==j, :);
@@ -134,11 +134,11 @@ for j = 1:numClasses
         xi = Xj(i,:)';
         tmp = xi'*L*B + B0;
         weights = exp(tmp - logsumexp(tmp, 2));
-        dLdij = -2*(1/n)*xi*(bj - sum(B.*weights, 2))';
-        g = g + dLdij; % add and repeat for next class
+        dLdij = (2/n)*xi*(bj - sum(B.*weights, 2))';
+        g = g - dLdij; % add and repeat for next class
     end
 end
-g = g + - 2*(1/var_x)*(1/Xnorm^2)*(alpha/(var_x+alpha))*(X'*(X*L)); %add derivative for PCA term
+g = g - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L); %add derivative for PCA term
 end
 
 %multiplied f2 by 2 to offset 1/2 in pca term.

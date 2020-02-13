@@ -50,6 +50,8 @@ end
 B = calc_B(X, L);
 var_x = (n*(p-k))^-1 * ((norm(X, 'fro')^2-norm(X*L, 'fro')^2));
 alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+eta = sqrt(var_x + alpha) - sqrt(var_x);
+gamma = (var_x + eta) / eta;
 var_y = (n*q)^-1 * norm(Y - X*(L*B), 'fro')^2;
 
 niter = 0;
@@ -67,7 +69,7 @@ while notConverged
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
     problem.cost  = @(L) 0.5*( (1/Ynorm^2)*((1/var_y)*norm(Y - X*(L*(X*L \ Y)), 'fro')^2 + + n*q*log(var_y)) + (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha)));
-    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*(X*L \ Y))))*(X*L \ Y)' - (1/var_x)*(1/Xnorm^2)*(alpha/(var_x+alpha))*(X'*(X*L));
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*(X*L \ Y))))*(X*L \ Y)' - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((L*X')*X)*L)*L');
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     options.maxiter = 2000;
@@ -93,6 +95,8 @@ while notConverged
     
     %update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+    eta = sqrt(var_x + alpha) - sqrt(var_x);
+    gamma = (var_x + eta) / eta;
     
     %update var_y
     var_y = (n*q)^-1 * norm(Y - X*(L*B), 'fro')^2;

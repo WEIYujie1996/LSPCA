@@ -67,6 +67,8 @@ B0 = Binit(1,:);
 B = Binit(2:end,:);
 var_x = (n*(p-k))^-1 * ((norm(X, 'fro')^2-norm(X*L, 'fro')^2));
 alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+eta = sqrt(var_x + alpha) - sqrt(var_x);
+gamma = (var_x + eta) / eta;
 niter = 0;
 notConverged = true;
 fstar = inf;
@@ -82,7 +84,7 @@ while notConverged
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
     problem.cost  = @(Ltilde) cost_fun(Ltilde, B, B0, X, Ymask, Xnorm, n, p, k, var_x, alpha);
-    problem.egrad = @(Ltilde) Lgrad(Ltilde, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, alpha);
+    problem.egrad = @(Ltilde) Lgrad(Ltilde, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, gamma);
     options.verbosity = 0;
     %options.minstepsize = 1e-12;
     options.stopfun = @mystopfun;
@@ -104,6 +106,8 @@ while notConverged
     
     %% update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+    eta = sqrt(var_x + alpha) - sqrt(var_x);
+    gamma = (var_x + eta) / eta;
     
     
     %% test for overall convergence
@@ -127,7 +131,7 @@ f2 = -(2/n)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');
 f =  f1 + f2;
 end
 
-function g = Lgrad(L, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, alpha)
+function g = Lgrad(L, B, B0, X, Y, Xnorm, numClasses, n, p, k, var_x, gamma)
 g = zeros(p,k);
 for j = 1:numClasses
     Xj = X(Y==j, :);
@@ -142,7 +146,7 @@ for j = 1:numClasses
         g = g - dLdij; % add and repeat for next class
     end
 end
-g = g + - 2*(1/var_x)*(1/Xnorm^2)*(alpha/(var_x+alpha))*(X'*(X*L)); %add derivative for PCA term
+g = g - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L); %add derivative for PCA term
 end
 
 function stopnow = mystopfun(problem, x, info, last)

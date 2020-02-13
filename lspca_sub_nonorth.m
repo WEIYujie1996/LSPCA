@@ -70,7 +70,7 @@ warning('off', 'manopt:getgradient:approx')
 manifold = euclideanfactory(p, k);
 problem.M = manifold;
 problem.cost  = @(L) (1/Xnorm^2)*lambda*norm(X - X*L*L', 'fro')^2 + (1-lambda)*(1/Ynorm^2)*norm(Y - (X*L)*(pinv(X*L)*Y), 'fro')^2;
-problem.egrad = @(L) (-4*(1/Xnorm^2)*lambda*((L'*X')*X) + (1/Xnorm^2)*lambda*((L*((L'*X')*X))*L + (((L*X')*X)*L)*L') - 2*(1-lambda)*(1/Ynorm^2)*(pinv(X*L)*Y)*((Y'*(eye(n)-(X*L)*pinv(X*L))*X)))';
+problem.egrad = @(L) (-4*(1/Xnorm^2)*lambda*((L'*X')*X) + ((1/Xnorm^2)*lambda*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L))' - 2*(1-lambda)*(1/Ynorm^2)*(pinv(X*L)*Y)*((Y'*(eye(n)-(X*L)*pinv(X*L))*X)))';
 options.verbosity = 0;
 options.stopfun = @mystopfun;
 % solve the subproblem for a number of iterations over the steifel

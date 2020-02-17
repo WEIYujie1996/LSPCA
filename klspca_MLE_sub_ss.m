@@ -1,4 +1,4 @@
-function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit, sstol)
+function [Zu, Yu, Zl, L, B, K] = klspca_MLE_sub_ss(Xu, Xl, Yl, sigma, k, L0, Kinit, sstol)
 % Inputs:
 %       X: (n x p) data matrix columns are features rows are
 %       observations
@@ -11,6 +11,7 @@ function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit, sstol)
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
 %
+%
 % Outputs:
 %
 %       Z: (n x k) dimension reduced form of X; A = X*L'
@@ -19,26 +20,36 @@ function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit, sstol)
 %
 %       B: (k x q) regression coefficients mapping reduced X to Y
 %           i.e. Y = X*L'*B
+%
 
-
-%create kernel matrix
+%create full matrix
+X = [Xl; Xu];
+%The kernel procedure is exactly the same as the regular procedure but with
+%a kernel matrix in place of X
+[nl, p] = size(Xl);
+[nu, ~] = size(Xu);
+n = nu + nl;
+[~, q] = size(Yl);
 if sigma == 0 && sum(abs(Kinit),'all') == 0 %to specify using a linear kernel (faster if n < p)
     X = X*X';
+    Xl = X(1:nl,:);
+    Xu = X(nl+1:end,:);
 elseif sum(abs(Kinit),'all') == 0
     X = gaussian_kernel(X, X, sigma);
+    Xl = X(1:nl,:);
+    Xu = X(nl+1:end,:);
 else
     X = Kinit;
+    Xl = X(1:nl,:);
+    Xu = X(nl+1:end,:);
 end
 
-%store dimensions:
-[n, p] = size(X);
-[~, q] = size(Y);
 %norms
 Xnorm = norm(X, 'fro');
-Ynorm = norm(Y, 'fro');
+Ynorm = norm(Yl, 'fro');
 
 %anonymous function for calculating Bi from Li and X
-calc_B = @(X, L) (X*L) \ Y;
+calc_B = @(X, L) (Xl*L) \ Yl;
 
 % initialize L0 by PCA of X, and B0 by L0
 if (sum(sum(L0 ~=0)) == 0)
@@ -47,12 +58,12 @@ else
     L = L0;
 end
 % initialize the other optimization variables
-B = calc_B(X, L);
+B = calc_B(Xl, L);
 var_x = (n*(p-k))^-1 * ((norm(X, 'fro')^2-norm(X*L, 'fro')^2));
 alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
 eta = sqrt(var_x + alpha) - sqrt(var_x);
 gamma = (var_x + eta) / eta;
-var_y = (n*q)^-1 * norm(Y - X*(L*B), 'fro')^2;
+var_y = (n*q)^-1 * norm(Yl - Xl*(L*B), 'fro')^2;
 
 niter = 0;
 notConverged = true;
@@ -68,8 +79,8 @@ while notConverged
     warning('off', 'manopt:getgradient:approx')
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
-    problem.cost  = @(L) 0.5*( (1/Ynorm^2)*((1/var_y)*norm(Y - X*(L*(X*L \ Y)), 'fro')^2 + + n*q*log(var_y)) + (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha)));
-    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*(X*L \ Y))))*(X*L \ Y)' - - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);
+    problem.cost  = @(L) 0.5*( (1/Ynorm^2)*((1/var_y)*norm(Yl - Xl*(L*(Xl*L \ Yl)), 'fro')^2 + + n*q*log(var_y)) + (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha)));
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(Xl'*(Yl-Xl*(L*(Xl*L \ Y))))*(Xl*L \ Yl)' - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);    
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     options.maxiter = 2000;
@@ -84,7 +95,7 @@ while notConverged
 %     fstar;
     
     %update B
-    B = calc_B(X, L);
+    B = calc_B(Xl, L);
 
     %update var_x
     if alpha>0
@@ -95,11 +106,9 @@ while notConverged
     
     %update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
-    eta = sqrt(var_x + alpha) - sqrt(var_x);
-    gamma = (var_x + eta) / eta;
     
     %update var_y
-    var_y = (n*q)^-1 * norm(Y - X*(L*B), 'fro')^2;
+    var_y = (nl*q)^-1 * norm(Yl - Xl*(L*B), 'fro')^2;
     
     %% test for overall convergence
     niter = niter+1;
@@ -109,14 +118,18 @@ while notConverged
     end
     
 end
-% set the output variables
-Z = X*L;
+% calculate reduced dimension data
+B = calc_B(Xl, L);
+Zl = Xl*L;
+Zu = Xu*L;
+Yu = Zu*B;
 K = X;
 end
 
 function stopnow = mystopfun(problem, x, info, last)
-stopnow1 = (last >= 3 && info(last-2).cost - info(last).cost < 1e-6);
-stopnow2 = info(last).gradnorm <= 1e-6;
-stopnow3 = info(last).stepsize <= 1e-8;
+stopnow1 = (last >= 10 && info(last-9).cost - info(last).cost < 1e-8);
+stopnow2 = info(last).gradnorm <= 1e-8;
+stopnow3 = info(last).stepsize <= 1e-15;
 stopnow = (stopnow1 && stopnow3) || stopnow2;
 end
+

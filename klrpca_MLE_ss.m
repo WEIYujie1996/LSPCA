@@ -138,7 +138,7 @@ B = [B0;B];
 K = X;
 end
 
-function f = cost_fun(L, B, B0, X, Xl, Ymask, Xnorm, n, p, k, var_x, alpha);
+function f = cost_fun(L, B, B0, X, Xl, Ymask, Xnorm, n, nl, p, k, var_x, alpha)
 tmp = (Xl*L)*B + B0;
 f1 = (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha));
 f2 = -(2/nl)*sum((tmp - logsumexp(tmp)).*Ymask, 'all');

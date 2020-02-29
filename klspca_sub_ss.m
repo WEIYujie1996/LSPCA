@@ -67,7 +67,7 @@ manifold = grassmannfactory(p, k, 1);
 %manifold = stiefelfactory(p, k);
 problem.M = manifold;
 problem.cost  = @(L) (1/Xnorm^2)*lambda*norm(X - X*L*L', 'fro')^2 + (1-lambda)*(1/Ynorm^2)*norm(Yl - (Xl*L)*((Xl*L)\Yl), 'fro')^2;
-problem.egrad = @(L) (-2*(1/Xnorm^2)*lambda*((L'*X')*X) - 2*(1-lambda)*(1/Ynorm^2)*((Xl*L)\Yl)*((Yl'*(eye(n)-(X*L)*pinv(X*L))*X)))';
+problem.egrad = @(L) (-2*(1/Xnorm^2)*lambda*((L'*X')*X) - 2*(1-lambda)*(1/Ynorm^2)*((Xl*L)\Yl)*((Yl'*(eye(nl)-(Xl*L)*pinv(Xl*L))*Xl)))';
 options.verbosity = 0;
 options.stopfun = @mystopfun;
 % solve the subproblem for a number of iterations over the steifel

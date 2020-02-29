@@ -49,7 +49,7 @@ Xnorm = norm(X, 'fro');
 Ynorm = norm(Yl, 'fro');
 
 %anonymous function for calculating Bi from Li and X
-calc_B = @(X, L) (Xl*L) \ Yl;
+calc_B = @(X, L) (X*L) \ Yl;
 
 % initialize L0 by PCA of X, and B0 by L0
 if (sum(sum(L0 ~=0)) == 0)
@@ -80,7 +80,7 @@ while notConverged
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
     problem.cost  = @(L) 0.5*( (1/Ynorm^2)*((1/var_y)*norm(Yl - Xl*(L*(Xl*L \ Yl)), 'fro')^2 + + n*q*log(var_y)) + (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha)));
-    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(Xl'*(Yl-Xl*(L*(Xl*L \ Y))))*(Xl*L \ Yl)' - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);    
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(Xl'*(Yl-Xl*(L*(Xl*L \ Yl))))*(Xl*L \ Yl)' - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     options.maxiter = 2000;
@@ -106,6 +106,8 @@ while notConverged
     
     %update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+    eta = sqrt(var_x + alpha) - sqrt(var_x);
+    gamma = (var_x + eta) / eta;
     
     %update var_y
     var_y = (nl*q)^-1 * norm(Yl - Xl*(L*B), 'fro')^2;

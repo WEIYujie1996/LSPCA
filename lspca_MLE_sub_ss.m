@@ -91,6 +91,8 @@ while notConverged
     
     %update alpha
     alpha = max((n*k)^-1 * norm(X*L, 'fro')^2 - var_x, 0);
+    eta = sqrt(var_x + alpha) - sqrt(var_x);
+    gamma = (var_x + eta) / eta;
     
     %update var_y
     var_y = (nl*q)^-1 * norm(Yl - Xl*(L*B), 'fro')^2;

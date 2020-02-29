@@ -24,7 +24,10 @@ for dd = 1:numExps
         Xlab = X(cvidx==l, :); %lth labled set
         Ylab = Y(cvidx==l, :);
         labidx = randperm(sum(cvidx==l), nlabs);
-        
+        Xunlab2 = Xlab;  Xunlab2(labidx, :) = []; 
+        Yunlab2 = Ylab;  Yunlab2(labidx, :) = [];
+        Xlab  = Xlab(labidx,:);
+        Ylab  = Ylab(labidx,:);
         %randomly select a fold to holdout, this is our test set for
         %inductive semisupervised learning
         testIdx = randi(kfold);
@@ -34,7 +37,9 @@ for dd = 1:numExps
         Xtest = X(cvidx==testIdx, :); %lth test set
         Ytest = Y(cvidx==testIdx, :);
         Xunlab = X((cvidx~=l & cvidx~=testIdx), :); %lth unlabled set
+        Xunlab = [Xunlab; Xunlab2];
         Yunlab = Y((cvidx~=l & cvidx~=testIdx), :);
+        Yunlab = [Yunlab; Yunlab2];
         [Xlab,Xunlab,Xtest,Ylab,Yunlab,Ytest] = ss_center_data(Xlab,Xunlab,Xtest,Ylab,Yunlab,Ytest,'regression');
         Xlabs{l} = Xlab; %lth centered labled set
         Ylabs{l} = Ylab;
@@ -49,9 +54,10 @@ for dd = 1:numExps
     % implementation
 
     %pick 5% of data for labeled data and use the rest as unlabeled
-    labIdx = crossvalind('kfold',Y,kfold,'classes',unique(Y),'min',1);
-    Xlab = X(labIdx==1,:); Ylab = Y(labIdx==1,:);
-    Xunlab = X(labIdx~=1,:); Yunlab = Y(labIdx~=1,:);
+    labIdx = randperm(n, 10);
+    Xlab = X(labIdx,:); Ylab = Y(labIdx,:);
+    Xunlab = X; Xunlab(labidx,:) = [];
+    Yunlab = Y; Yunlab(labidx,:) = [];
     %center the labeled, unlabeled, and holdout data
     [Xlab,Xunlab,Xhold,Ylab,Yunlab,Yhold] = ss_center_data(Xlab,Xunlab,Xhold,Ylab,Yunlab,Yhold,'regression');
     Xlabs{kfold+1} = Xlab; %lth centered labeled set
@@ -256,7 +262,7 @@ for dd = 1:numExps
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
             
-            Linit = orth(randn(nlab,k));
+            Linit = orth(randn(n,k));
             %Linit = 0;
             for ss = 1:length(sigmas)
                 sigma = sigmas(ss)

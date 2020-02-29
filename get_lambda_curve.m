@@ -4,7 +4,7 @@ for dd = 1:numExps
     load(strcat(dataset, '.mat'));
     [n, p] = size(X);
     [~, q] = size(Y);
-    ks = 2:min(10, p-1);
+    ks = 2;
     
     %holdout an independent test set
     proportion = 0.2;
@@ -149,19 +149,36 @@ for dd = 1:numExps
     
     %% Calc performance for best model and store
     
-    LSPCAval(dd,:,:) = squeeze(LSPCArates(end,:,:));
-    LSPCAvalVar(dd,:,:) = squeeze(LSPCAvar(end,:,:)); 
-    LSPCAval_valid(dd,:,:) = squeeze(avgLSPCA);
-    LSPCAvalVar_valid(dd,:,:) = squeeze(avgLSPCAvar);    
-    LSPCAval_train(dd,:,:) = squeeze(avgLSPCA_train);
-    LSPCAvalVar_train(dd,:,:) = squeeze(avgLSPCAvar_train);
+    loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
+    [~,kloc,lamloc] = ind2sub(size(avgLSPCA), loc);
+    klspca = ks(kloc);
+    LSPCAval(dd) = LSPCArates(end,kloc,lamloc);
+    LSPCAvalVar(dd) = LSPCAvar(end,kloc,lamloc);
     
-    kLSPCAval(dd,:,:,:) = squeeze(kLSPCArates(end,:,:));
-    kLSPCAvalVar(dd,:,:,:) = squeeze(kLSPCAvar(end,:,:)); 
-    kLSPCAval_valid(dd,:,:,:) = squeeze(avgkLSPCA);
-    kLSPCAvalVar_valid(dd,:,:,:) = squeeze(avgkLSPCAvar);    
-    kLSPCAval_train(dd,:,:,:) = squeeze(avgkLSPCA_train);
-    kLSPCAvalVar_train(dd,:,:,:) = squeeze(avgkLSPCAvar_train);
+    
+    loc = find(avgkLSPCA==min(avgkLSPCA,[],'all'),1,'last');
+    [~,klock,lamlock,siglock] = ind2sub(size(avgkLSPCA), loc);
+    kklspca = ks(klock);
+    kLSPCAval(dd) = kLSPCArates(end,klock,lamlock,siglock);
+    kLSPCAvalVar(dd) = kLSPCAvar(end,klock,lamlock,siglock);
+    
+    loc = find(avgLSPCA(:,kloc,:)==min(avgLSPCA(:,kloc,:),[],'all'),1,'last');
+    [~,~,lamloc] = ind2sub(size(avgLSPCA(:,kloc,:)), loc);
+    klspca = ks(kloc);
+    LSPCAval_fixed(dd) = LSPCArates(end,kloc,lamloc);
+    LSPCAvalVar_fixed(dd) = LSPCAvar(end,kloc,lamloc);
+    
+    loc = find(avgkLSPCA(:,kloc,:,:)==min(avgkLSPCA(:,kloc,:,:),[],'all'),1,'last');
+    [~,~,lamlock,siglock] = ind2sub(size(avgkLSPCA(:,kloc,:,:)), loc);
+    klock=kloc;
+    kklspca = ks(klock);
+    kLSPCAval_fixed(dd) = kLSPCArates(end,klock,lamlock,siglock);
+    kLSPCAvalVar_fixed(dd) = kLSPCAvar(end,klock,lamlock,siglock);
+    
+    LSPCAval_track(dd,:,:,:) = LSPCArates;
+    LSPCAvar_track(dd,:,:,:) = LSPCAvar;
+    kLSPCAval_track(dd,:,:,:) = kLSPCArates;
+    kLSPCAvar_track(dd,:,:,:) = kLSPCAvar;
     
 end
 

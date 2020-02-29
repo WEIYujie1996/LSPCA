@@ -17,11 +17,14 @@ for dd = 1:numExps
     n = n - nhold; %this is our new n
     
     % create same splits to use every time and center
-    kfold = 10;
+    nlabs = 10;
+    kfold = 3;
     cvidx = crossvalind('kfold',n,kfold);
     for l = 1:kfold
         Xlab = X(cvidx==l, :); %lth labled set
         Ylab = Y(cvidx==l, :);
+        labidx = randperm(sum(cvidx==l), nlabs);
+        
         %randomly select a fold to holdout, this is our test set for
         %inductive semisupervised learning
         testIdx = randi(kfold);

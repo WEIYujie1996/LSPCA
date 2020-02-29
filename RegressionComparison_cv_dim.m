@@ -4,7 +4,8 @@ for dd = 1:numExps
     load(strcat(dataset, '.mat'));
     [n, p] = size(X);
     [~, q] = size(Y);
-    ks = 2:min(10, p-1);
+%     ks = 2:min(10, p-1);
+    ks = 2;
     
     %holdout an independent test set
     proportion = 0.2;
@@ -379,7 +380,7 @@ for dd = 1:numExps
             sppca_err = [];
             % solve
             for count = 1%:10 %do 10 initializations and take the best b/c ends up in bad local minima a lot
-                [Zsppca, Lsppca, B, W_x, W_y, var_x, var_y] = SPPCA_cf(Xtrain,Ytrain,k);
+                [Zsppca, Lsppca, B, W_x, W_y, var_x, var_y] = SPPCA(Xtrain,Ytrain,k);
                 Zsppcas{count} = Zsppca;
                 Lsppcas{count} = Lsppca;
                 SPPCAXtest{count} = Xtest*Lsppca;
@@ -566,6 +567,11 @@ for dd = 1:numExps
     PCAval(dd) = PCArates(end,kloc);
     PCAvalVar(dd) = PCAvar(end,kloc);
     
+    loc = find(avgkPCA==min(avgkPCA,[],'all'),1,'last');
+    [~,klock,siglock] = ind2sub(size(avgkPCA), loc);
+    kPCAval(dd) = kPCArates(end,klock,siglock);
+    kPCAvalVar(dd) = kPCAvar(end,klock,siglock);
+    
     loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
     [~,kloc,lamloc] = ind2sub(size(avgLSPCA), loc);
     klspca = ks(kloc);
@@ -651,6 +657,12 @@ for dd = 1:numExps
     PCAval_fixed(dd) = PCArates(end,kloc);
     PCAvalVar_fixed(dd) = PCAvar(end,kloc);
     
+    loc = find(avgkPCA(:,kloc,:)==min(avgkPCA(:,kloc,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkPCA(:,kloc,:)), loc);
+    kkpca = ks(kloc);
+    kPCAval_fixed(dd) = kPCArates(end,kloc,sigloc);
+    kPCAvalVar_fixed(dd) = kPCAvar(end,kloc,sigloc);
+    
     loc = find(avgLSPCA(:,kloc,:)==min(avgLSPCA(:,kloc,:),[],'all'),1,'last');
     [~,~,lamloc] = ind2sub(size(avgLSPCA(:,kloc,:)), loc);
     klspca = ks(kloc);
@@ -711,6 +723,16 @@ for dd = 1:numExps
     R4val_fixed(dd) = ridge_rrr_rates(end,kloc,locr4);
     R4valVar_fixed(dd) = ridge_rrrvars(end,kloc,locr4);
     
+    % track full values
+    LSPCAval_track(dd,:,:,:) = LSPCArates;
+    LSPCAvar_track(dd,:,:,:) = LSPCAvar;
+    LSPCAval_track_train(dd,:,:,:) = LSPCArates_train;
+    LSPCAvar_track_train(dd,:,:,:) = LSPCAvar_train;
+    kLSPCAval_track(dd,:,:,:) = kLSPCArates;
+    kLSPCAvar_track(dd,:,:,:) = kLSPCAvar;
+    kLSPCAval_track_train(dd,:,:,:) = kLSPCArates_train;
+    kLSPCAvar_track_train(dd,:,:,:) = kLSPCAvar_train;
+    
 end
 
 %% save all data
@@ -722,6 +744,12 @@ v = mean(PCAvalVar);
 sm = std(PCAval);
 sv = std(PCAvalVar);
 sprintf('PCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+
+m = mean(kPCAval);
+v = mean(kPCAvalVar);
+sm = std(kPCAval);
+sv = std(kPCAvalVar);
+sprintf('kPCAerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
 
 m = mean(ISPCAval);
@@ -807,6 +835,18 @@ sm = std(PCAval_fixed);
 sv = std(PCAvalVar_fixed);
 sprintf('PCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
+% m = mean(kPCAval_fixed);
+% v = mean(kPCAvalVar_fixed);
+% sm = std(kPCAval_fixed);
+% sv = std(kPCAvalVar_fixed);
+% sprintf('kPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
+m = mean(kPCAval_fixed);
+v = mean(kPCAvalVar_fixed);
+sm = std(kPCAval_fixed);
+sv = std(kPCAvalVar_fixed);
+sprintf('kPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+
 m = mean(ISPCAval_fixed);
 v = mean(ISPCAvalVar_fixed);
 sm = std(ISPCAval_fixed);
@@ -879,72 +919,69 @@ sm = std(mle_kLSPCAval_fixed);
 sv = std(mle_kLSPCAvalVar_fixed);
 sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
+
 % %% plot error - var tradeoff curves
-% %
-% %
-% kloc = find(ks==klspca);
-% t = kloc;
-% temp = avgLSPCA(:,t,:,:);
-% temp = reshape(temp, [length(Gammas), length(Lambdas)]);
-% tempv = avgLSPCAvar(:,t,:,:);
-% tempv = reshape(tempv, [length(Gammas), length(Lambdas)]);
-% [mLSPCA, I] = min(temp);
-% I = sub2ind(size(temp),I,1:length(I));
-% vLSPCA = tempv(I);
-% 
-% 
-% kloc = find(ks==kklspca);
-% t = kloc;
-% temp = avgkLSPCA(:,t,:,:);
-% temp = reshape(temp, [length(Gammas), length(Lambdas), length(sigmas)]);
-% tempv = avgkLSPCAvar(:,t,:,:);
-% tempv = reshape(tempv, [length(Gammas), length(Lambdas), length(sigmas)]);
-% [res, I1] = min(temp, [], 1);
-% [~,a,b] = size(I1);
-% for i=1:a
-%     for j=1:b
-%         %tempvv(i,j) = tempv(I1(1,i,j),i,j);
-%         tempvv(i,j) = tempv(I1(1,i,j),i,j);
-%     end
-% end
-% [mkLSPCA, I2] = min(res, [], 3);
-% [~,c] = size(I2);
-% for i=1:c
-%     vkLSPCA(i) = tempvv(i,10);
-% end
-% 
-% 
-% 
 % 
 % % for t = 1:length(ks)
 % figure()
 % hold on
-% plot(avgPCAvar(1,kpca-1), avgPCA(1,kpca-1), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
-% %plot(avgkPCAvar_train(1,t), avgkPCA(1,t), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(vLSPCA(:), mLSPCA(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-% % plot(lambda_avgLSPCAvar_train(1,t,:), lambda_avgLSPCA(1,t, :), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(vkLSPCA(:), mkLSPCA(:), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(avgISPCAvar(1,kispca-1), avgISPCA(1,kispca-1), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(avgSPPCAvar(1,ksppca-1), avgSPPCA(1,ksppca-1), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(avgSPCAvar(1,kspca-1), avgSPCA(1,kspca-1), '+', 'MarkerSize', 20, 'LineWidth', 2)
-% loc = find(avgkSPCA(:,kkspca-1,:)==min(avgkSPCA(:,kkspca-1,:),[],'all'),1,'last');
-% [~,~,sigloc] = ind2sub(size(avgkSPCA(:,kkspca-1,:)), loc);
-% plot(avgkSPCAvar(1,kkspca-1,sigloc), avgkSPCA(1,kkspca-1,sigloc), '>', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(avgR4var(kr4-1,2:end), avgR4(kr4-1, 2:end), ':', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(avgR4var(krrr-1,1), avgR4(krrr-1, 1), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(avgPLSvar(1,kpls), avgPLS(1,kpls), 'h', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(avgSSVDvar(1,kssvd), avgSSVD(1,kssvd), 'd', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(PCAvalVar_fixed), mean(PCAval_fixed), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+% % plot(mean(kPCAvalVar_fixed), mean(kPCAval_fixed), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(squeeze(LSPCAvar(end,2,:)), squeeze(LSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(squeeze(kLSPCAvar(end,2,:)), squeeze(kLSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(mle_LSPCAvalVar_fixed), mean(mle_LSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(mle_kLSPCAvalVar_fixed), mean(mle_kLSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(ISPCAvalVar_fixed), mean(ISPCAval_fixed), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SPPCAvalVar_fixed), mean(SPPCAval_fixed), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SPCAvalVar_fixed), mean(SPCAval_fixed), '+', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(kSPCAvalVar_fixed), mean(kSPCAval_fixed), '>', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(RRRvalVar_fixed), mean(RRRval_fixed), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(PLSvalVar_fixed), mean(PLSval_fixed), 'h', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SSVDvalVar_fixed), mean(SSVDval_fixed), 'd', 'MarkerSize', 20, 'LineWidth', 2)
 % 
 % xlabel('Variation Explained', 'fontsize', 25)
 % %title('Test', 'fontsize', 25)
 % ylabel('MSE', 'fontsize', 25)
 % %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
 % set(gca, 'fontsize', 25)
-% lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
+% lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'LSPCA (MLE)', 'kLSPCA (MLE)', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
 % %lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
 % %ylim([0, 0.12])
 % %set(gca, 'YScale', 'log')
 % xlim([0,1])
+% 
+% %% plot error - var tradeoff curves
+% 
+% % for t = 1:length(ks)
+% figure()
+% hold on
+% plot(mean(PCAvalVar), mean(PCAval), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+% % plot(mean(kPCAvalVar), mean(kPCAval), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+% % plot(squeeze(LSPCAvar(end,2,:)), squeeze(LSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+% % plot(squeeze(kLSPCAvar(end,2,:)), squeeze(kLSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(LSPCAvalVar), mean(LSPCAval), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(kLSPCAvalVar), mean(kLSPCAval), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(mle_LSPCAvalVar), mean(mle_LSPCAval), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(mle_kLSPCAvalVar), mean(mle_kLSPCAval), '*', 'LineWidth', 2, 'MarkerSize', 20)
+% plot(mean(ISPCAvalVar), mean(ISPCAval), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SPPCAvalVar), mean(SPPCAval), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SPCAvalVar), mean(SPCAval), '+', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(kSPCAvalVar), mean(kSPCAval), '>', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(RRRvalVar), mean(RRRval), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(PLSvalVar), mean(PLSval), 'h', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(SSVDvalVar), mean(SSVDval), 'd', 'MarkerSize', 20, 'LineWidth', 2)
+% 
+% xlabel('Variation Explained', 'fontsize', 25)
+% %title('Test', 'fontsize', 25)
+% ylabel('MSE', 'fontsize', 25)
+% %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+% set(gca, 'fontsize', 25)
+% lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'LSPCA (MLE)', 'kLSPCA (MLE)', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
+% %lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
+% %ylim([0, 0.12])
+% %set(gca, 'YScale', 'log')
+% xlim([0,1])
+
 % 
 % %% add MLE results to plot
 % avgLSPCA = mean(LSPCArates, 1);

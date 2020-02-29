@@ -4,7 +4,8 @@ for dd = 1:numExps
     load(strcat(dataset, '.mat'));
     [n, p] = size(X);
     [~, q] = size(Y);
-    ks = 2:min(10, p-1);
+    %ks = 2:min(10, p-1);
+    ks = 2;
     
     %holdout an independent test set
     proportion = 0.2;
@@ -46,7 +47,7 @@ for dd = 1:numExps
     % implementation
 
     %pick 5% of data for labeled data and use the rest as unlabeled
-    labIdx = crossvalind('kfold',Y,kfold,'classes',unique(Y),'min',1);
+    labIdx = crossvalind('kfold',n,kfold);
     Xlab = X(labIdx==1,:); Ylab = Y(labIdx==1,:);
     Xunlab = X(labIdx~=1,:); Yunlab = Y(labIdx~=1,:);
     %center the labeled, unlabeled, and holdout data
@@ -74,28 +75,29 @@ for dd = 1:numExps
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
+            Yunlab = Yunlabs{l};
             [nlab, ~] = size(Ylab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
             
             tic
-            [Lpca, Zpca] = pca(Xlab, 'NumComponents', k);
+            [Lpca, Zpca] = pca([Xlab; Xunlab], 'NumComponents', k);
             Zpcas{l,t} = Zpca;
-            Lpca = Lpca';
             % compute embedding for test data
-            pcaXtest = Xtest*Lpca';
+            pcaXtest = Xtest*Lpca;
             pcaXtests{l,t} = pcaXtest;
             PCAtimes(l,t,t) = toc;
             % compute error
-            B = Zpca \ Ylab;
-            PCRYlab = Zpca*B;
+            B = (Xlab*Lpca) \ Ylab;
+            PCRYlab = (Xlab*Lpca)*B;
             PCRYtest = pcaXtest*B;
             mse = norm(PCRYtest - Ytest, 'fro')^2 /ntest;
             PCArates(l,t) = mse ;
             PCArates_lab(l,t) = norm(PCRYlab - Ylab, 'fro')^2 / nlab;
-            PCAvar(l,t) = norm(Xtest*Lpca', 'fro') / norm(Xtest, 'fro');
-            PCAvar_lab(l,t) = norm(Xlab*Lpca', 'fro') / norm(Xlab, 'fro');
+            PCAvar(l,t) = norm(Xtest*Lpca, 'fro') / norm(Xtest, 'fro');
+            PCAvar_lab(l,t) = norm(Zpca, 'fro') / norm([Xlab;Xunlab], 'fro');
         end
         
         %% PLS
@@ -109,9 +111,12 @@ for dd = 1:numExps
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
             %solve for basis
-            [Xloadings,Yloadings,Xscores,Yscores,betaPLS,pctVar,~,stats] = plsregress(Xlab,Ylab,k);
-            Lpls = orth(stats.W)';
-            Lpls = Lpls(1:k, :);
+            try
+                [Xloadings,Yloadings,Xscores,Yscores,betaPLS,pctVar,~,stats] = plsregress(Xlab,Ylab,min(k, nlab));
+            catch
+                [Xloadings,Yloadings,Xscores,Yscores,betaPLS,pctVar,~,stats] = plsregress(Xlab,Ylab,1);
+            end
+            Lpls = orth(stats.W);
             % predict
             PLSYtest = [ones(ntest,1) Xtest]*betaPLS;
             PLSYlab = [ones(nlab,1) Xlab]*betaPLS;
@@ -119,7 +124,7 @@ for dd = 1:numExps
             mse = norm(PLSYtest - Ytest, 'fro')^2;
             PLSrates(l,t) = mse / ntest;
             PLSrates_lab(l,t) = norm(PLSYlab - Ylab, 'fro')^2 / nlab;
-            PLSvar(l,t) = norm(Xtest*Lpls', 'fro') / norm(Xlab, 'fro');
+            PLSvar(l,t) = norm(Xtest*Lpls, 'fro') / norm(Xtest, 'fro');
             PLSvar_lab(l,t) = sum(pctVar(1,:));
         end
         
@@ -132,7 +137,9 @@ for dd = 1:numExps
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
+            [nunlab,~] = size(Xunlab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
@@ -170,14 +177,16 @@ for dd = 1:numExps
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
+            [nunlab,~] = size(Xunlab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
             
             %solve
-            Linit = orth(randn(p,k));
-            %        Linit = 0;
+            %Linit = orth(randn(p,k));
+            Linit = 0;
             %         V = pca(Xlab);
             %        Linit = V(:,1:2);
             %         c = 0.5;
@@ -207,7 +216,9 @@ for dd = 1:numExps
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
+            [nunlab,~] = size(Xunlab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
@@ -248,12 +259,14 @@ for dd = 1:numExps
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
+            [nunlab,~] = size(Xunlab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
             
-            Linit = orth(randn(nlab,k));
+            Linit = orth(randn(nlab+nunlab,k));
             %Linit = 0;
             for ss = 1:length(sigmas)
                 sigma = sigmas(ss)
@@ -277,10 +290,11 @@ for dd = 1:numExps
         
         %% KPCA
         for l = 1:kfold+1
-            test_num = l;
+            test_num = l
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
@@ -288,19 +302,19 @@ for dd = 1:numExps
             for jj = 1:length(sigmas)
                 sigma = sigmas(jj);
                 K = gaussian_kernel([Xlab; Xunlab], [Xlab; Xunlab], sigma);
+                Klab = K(1:nlab,:);
                 Ktest = gaussian_kernel(Xtest, [Xlab; Xunlab], sigma);
                 tic
                 [Lkpca, Zkpca] = pca(K, 'NumComponents', k);
                 kPCAtimes(l,t,t,jj) = toc;
                 Zkpcas{l,t,jj} = Zkpca;
-                Lkpca = Lkpca';
                 % compute embedding for test data
-                kpcaXtest = Ktest*Lkpca';
+                kpcaXtest = Ktest*Lkpca;
                 kpcaXtests{l,t,jj} = kpcaXtest;
                 % compute error
-                B = Zkpca \ Ylab;
+                B = (Klab*Lkpca) \ Ylab;
                 kpcaYtest = kpcaXtest*B;
-                kpcaYlab = Zkpca*B;
+                kpcaYlab = (Klab*Lkpca)*B;
                 mse = norm(kpcaYtest - Ytest, 'fro')^2 / ntest;
                 lab_err = norm(Ylab - kpcaYlab, 'fro')^2 / nlab;
                 kPCArates(l,t,jj) = mse;
@@ -317,7 +331,7 @@ for dd = 1:numExps
             params(1) = 0; %edge case is just RRR
             ridge_solns = [];
             for l = 1:kfold+1
-                test_num = l;
+                test_num = l
                 % get lth fold
                 Xlab = Xlabs{l};
                 Ylab = Ylabs{l};
@@ -356,7 +370,7 @@ for dd = 1:numExps
         
         %% ISPCA
         for l = 1:kfold+1
-            test_num = l;
+            test_num = l
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
@@ -366,7 +380,7 @@ for dd = 1:numExps
             [ntest, ~] = size(Ytest);
             %find basis
             tic
-            [Zispca, Lispca, B] = ISPCA(Xlab,Ylab,k);
+            [Zispca, Lispca, B] = ISPCA(Xlab,Ylab,min(k,nlab));
             ISPCAtimes(l,t) = toc;
             % predict
             ISPCAXtest = Xtest*Lispca';
@@ -382,11 +396,13 @@ for dd = 1:numExps
         
         %% SPPCA
         for l = 1:kfold+1
-            test_num = l;
+            test_num = l
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
+            Xunlab = Xunlabs{l};
             [nlab, ~] = size(Ylab);
+            [nunlab,~] = size(Xunlab);
             Xtest = Xtests{l};
             Ytest = Ytests{l};
             [ntest, ~] = size(Ytest);
@@ -399,6 +415,7 @@ for dd = 1:numExps
             % solve
             for count = 1%:10 %do 10 initializations and take the best b/c ends up in bad local minima a lot
                 [Zunlab, ~, Zsppca, Lsppca, ~] = SPPCA_SS(Xunlab,Xlab,Ylab,k,1e-6);
+                Lsppca = Lsppca';
                 Zsppcas{count} = Zsppca;
                 Lsppcas{count} = Lsppca;
                 SPPCAXtest{count} = Xtest*Lsppca;
@@ -426,7 +443,7 @@ for dd = 1:numExps
         %% Barshan
         
         for l = 1:kfold+1
-            test_num = l;
+            test_num = l
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
@@ -436,10 +453,10 @@ for dd = 1:numExps
             [ntest, ~] = size(Ytest);
             
             %learn basis
-            [Zspca Lspca] = SPCA(Xlab', Ylab', k);
+            [Zspca Lspca] = SPCA(Xlab', Ylab', min(k,nlab));
             spcaXtest = Xtest*Lspca';
             % predict
-            betaSPCA = Zspca \Ylab;
+            betaSPCA = Zspca \ Ylab;
             SPCAYtest = spcaXtest * betaSPCA;
             SPCAYlab = Zspca*betaSPCA;
             %compute error
@@ -452,7 +469,7 @@ for dd = 1:numExps
         
         %% Perform Barshan's KSPCA based 2D embedding
         for l = 1:kfold+1
-            test_num = l;
+            test_num = l
             % get lth fold
             Xlab = Xlabs{l};
             Ylab = Ylabs{l};
@@ -468,7 +485,7 @@ for dd = 1:numExps
                 barshparam.kparam_y = 1;
                 barshparam.ktype_x = 'rbf';
                 barshparam.kparam_x = sigma;
-                [Zkspca, Lkspca] = KSPCA(Xlab', Ylab', k, barshparam);
+                [Zkspca, Lkspca] = KSPCA(Xlab', Ylab', min(k,nlab), barshparam);
                 Zkspca = Zkspca';
                 %do regression in learned basis
                 betakSPCA = Zkspca \ Ylab;
@@ -489,31 +506,31 @@ for dd = 1:numExps
         end
         
         
-        %% Sup SVD
-        for l = 1:kfold+1
-            test_num = l;
-            % get lth fold
-            Xlab = Xlabs{l};
-            Ylab = Ylabs{l};
-            [nlab, ~] = size(Ylab);
-            Xtest = Xtests{l};
-            Ytest = Ytests{l};
-            [ntest, ~] = size(Ytest);
-            % solve
-            [~,V,Zssvd,~,~]=SupPCA(Ylab,Xlab,k);
-            Lssvd = V';
-            % Predict
-            Bssvd = Zssvd \ Ylab;
-            SSVDXtest = Xtest*Lssvd';
-            SSVDYtest = SSVDXtest*Bssvd;
-            SSVDYlab = Zssvd*Bssvd;
-            %compute error
-            mse = norm(SSVDYtest - Ytest, 'fro')^2 / ntest;
-            SSVDrates(l,t) = mse ;
-            SSVDrates_lab(l,t) = norm(SSVDYlab - Ylab, 'fro')^2 / nlab;
-            SSVDvar(l,t) = norm(SSVDXtest, 'fro') / norm(Xtest, 'fro');
-            SSVDvar_lab(l,t) = norm(Zssvd, 'fro') / norm(Xlab, 'fro');
-        end
+%         %% Sup SVD
+%         for l = 1:kfold+1
+%             test_num = l;
+%             % get lth fold
+%             Xlab = Xlabs{l};
+%             Ylab = Ylabs{l};
+%             [nlab, ~] = size(Ylab);
+%             Xtest = Xtests{l};
+%             Ytest = Ytests{l};
+%             [ntest, ~] = size(Ytest);
+%             % solve
+%             [~,V,Zssvd,~,~]=SupPCA(Ylab,Xlab,k);
+%             Lssvd = V';
+%             % Predict
+%             Bssvd = Zssvd \ Ylab;
+%             SSVDXtest = Xtest*Lssvd';
+%             SSVDYtest = SSVDXtest*Bssvd;
+%             SSVDYlab = Zssvd*Bssvd;
+%             %compute error
+%             mse = norm(SSVDYtest - Ytest, 'fro')^2 / ntest;
+%             SSVDrates(l,t) = mse ;
+%             SSVDrates_lab(l,t) = norm(SSVDYlab - Ylab, 'fro')^2 / nlab;
+%             SSVDvar(l,t) = norm(SSVDXtest, 'fro') / norm(Xtest, 'fro');
+%             SSVDvar_lab(l,t) = norm(Zssvd, 'fro') / norm(Xlab, 'fro');
+%         end
         
         
     end
@@ -545,8 +562,8 @@ for dd = 1:numExps
     avgSPPCA_lab = mean(SPPCArates_lab(1:end-1,:));
     avgR4 = mean(ridge_rrr_rates(1:end-1,:,:), 1);
     avgR4_lab = mean(ridge_rrr_rates_lab(1:end-1,:,:), 1);
-    avgSSVD = mean(SSVDrates(1:end-1,:));
-    avgSSVD_lab = mean(SSVDrates_lab(1:end-1,:));
+%     avgSSVD = mean(SSVDrates(1:end-1,:));
+%     avgSSVD_lab = mean(SSVDrates_lab(1:end-1,:));
     
     avgPCAvar = mean(PCAvar(1:end-1,:));
     avgkPCAvar = mean(kPCAvar(1:end-1,:,:));
@@ -560,7 +577,7 @@ for dd = 1:numExps
     avgISPCAvar = mean(ISPCAvar(1:end-1,:));
     avgSPPCAvar = mean(SPPCAvar(1:end-1,:));
     avgR4var = mean(ridge_rrrvars(1:end-1,:,:), 1);
-    avgSSVDvar = mean(SSVDvar(1:end-1,:));
+%     avgSSVDvar = mean(SSVDvar(1:end-1,:));
     
     avgPCAvar_lab = mean(PCAvar_lab(1:end-1,:));
     avgkPCAvar_lab = mean(kPCAvar_lab(1:end-1,:,:));
@@ -574,7 +591,7 @@ for dd = 1:numExps
     avgISPCAvar_lab = mean(ISPCAvar_lab(1:end-1,:));
     avgSPPCAvar_lab = mean(SPPCAvar_lab(1:end-1,:));
     avgR4var_lab = mean(ridge_rrrvars_lab(1:end-1,:,:), 1);
-    avgSSVDvar_lab = mean(SSVDvar_lab(1:end-1,:));
+%     avgSSVDvar_lab = mean(SSVDvar_lab(1:end-1,:));
     
     %% Calc performance for best model and store
     
@@ -642,11 +659,11 @@ for dd = 1:numExps
     PLSval(dd) = PLSrates(end,kloc);
     PLSvalVar(dd) = PLSvar(end,kloc);
     
-    loc = find(avgSSVD==min(avgSSVD,[],'all'),1,'last');
-    [~,kloc] = ind2sub(size(avgSSVD), loc);
-    kssvd = ks(kloc);
-    SSVDval(dd) = SSVDrates(end,kloc);
-    SSVDvalVar(dd) = SSVDvar(end,kloc);
+%     loc = find(avgSSVD==min(avgSSVD,[],'all'),1,'last');
+%     [~,kloc] = ind2sub(size(avgSSVD), loc);
+%     kssvd = ks(kloc);
+%     SSVDval(dd) = SSVDrates(end,kloc);
+%     SSVDvalVar(dd) = SSVDvar(end,kloc);
     
     loc = find(avgR4==min(avgR4,[],'all'),1,'last');
     [~,kloc,~] = ind2sub(size(avgR4), loc);
@@ -715,9 +732,9 @@ for dd = 1:numExps
     PLSval_fixed(dd) = PLSrates(end,kloc);
     PLSvalVar_fixed(dd) = PLSvar(end,kloc);
     
-    kssvd = ks(kloc);
-    SSVDval_fixed(dd) = SSVDrates(end,kloc);
-    SSVDvalVar_fixed(dd) = SSVDvar(end,kloc);
+%     kssvd = ks(kloc);
+%     SSVDval_fixed(dd) = SSVDrates(end,kloc);
+%     SSVDvalVar_fixed(dd) = SSVDvar(end,kloc);
     
     krrr = ks(kloc);
     loc = 1; % RRR with parameter value 0
@@ -733,7 +750,7 @@ for dd = 1:numExps
 end
 
 %% save all data
-save(strcat(dataset, '_results_dim'))
+save(strcat(dataset, '_results_dim_ss'))
 
 %% Print results over all subspace dimensions
 m = mean(PCAval);
@@ -761,11 +778,11 @@ sm = std(SPCAval);
 sv = std(SPCAvalVar);
 sprintf('Barshanerr: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
-m = mean(SSVDval);
-v = mean(SSVDvalVar);
-sm = std(SSVDval);
-sv = std(SSVDvalVar);
-sprintf('SSVD: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
+% m = mean(SSVDval);
+% v = mean(SSVDvalVar);
+% sm = std(SSVDval);
+% sv = std(SSVDvalVar);
+% sprintf('SSVD: $%0.3f \\pm %0.3f$ & $%0.3f \\pm %0.3f$', m, sm, v, sv)
 
 m = mean(PLSval);
 v = mean(PLSvalVar);
@@ -844,11 +861,11 @@ sm = std(SPCAval_fixed);
 sv = std(SPCAvalVar_fixed);
 sprintf('Barshanerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
-m = mean(SSVDval_fixed);
-v = mean(SSVDvalVar_fixed);
-sm = std(SSVDval_fixed);
-sv = std(SSVDvalVar_fixed);
-sprintf('SSVD: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
+% m = mean(SSVDval_fixed);
+% v = mean(SSVDvalVar_fixed);
+% sm = std(SSVDval_fixed);
+% sv = std(SSVDvalVar_fixed);
+% sprintf('SSVD: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 m = mean(PLSval_fixed);
 v = mean(PLSvalVar_fixed);

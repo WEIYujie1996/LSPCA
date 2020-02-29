@@ -404,7 +404,7 @@ for t = 1:length(ks) %dimensionality of reduced data
 end
 
 %% save all data
-save(strcat(dataset, '_results_dim_mle'))
+save(strcat(dataset, '_results_dim_mle_10'))
 
 %% compute avg performance for each k
 

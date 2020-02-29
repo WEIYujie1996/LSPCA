@@ -72,8 +72,9 @@ for t = 1:length(ks) %dimensionality of reduced data
 end
 
 %% kLSPCA
-for t = 1:length(ks) %dimensionality of reduced data
+%for t = 1:length(ks) %dimensionality of reduced data
     k = ks(t)
+    k=2
     for l = 1:kfold
         test_num = l
         % get lth fold
@@ -108,17 +109,17 @@ for t = 1:length(ks) %dimensionality of reduced data
                     kLSPCArates_lab(l,t,ii,jj,kk) = lab_err;
                     Klab = Klspca(1:nlab,:);
                     Kunlab = Klspca(nlab+1:end,:);
-                    kLSPCAvar(l,t,ii,jj,kk) = norm(kLSPCAXunlab, 'fro') / norm(gaussian_kernel(Xunlab,Xlab,sigma), 'fro');
+                    kLSPCAvar(l,t,ii,jj,kk) = norm(kLSPCAXunlab, 'fro') / norm(gaussian_kernel(Xunlab,[Xlab; Xunlab],sigma), 'fro');
                     kLSPCAvar_lab(l,t,ii,jj,kk) = norm(Zklspca, 'fro') / norm(Klspca, 'fro');
                 end
             end
         end
         mean(kLSPCArates)
-    end
+   % end
 end
 
 %% save all data
-save(strcat(dataset, '_results_dim_mle_ss_onlyUs'))
+save(strcat(dataset, '_results_dim_ss_onlyUs'))
 
 %% compute avg performance for each k
 
@@ -136,22 +137,22 @@ avgkLSPCAvar_lab = mean(kLSPCAvar_lab, 1);
 %% Print results over all subspace dimensions
 
 loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
-[~,kloc] = ind2sub(size(avgLSPCA), loc);
+[~,kloc,gamloc,lamloc] = ind2sub(size(avgLSPCA), loc);
 k = ks(kloc);
-m = mean(LSPCArates(:,kloc), 1);
-v = mean(LSPCAvar(:,kloc), 1);
-sm = std(LSPCArates(:,kloc), 1);
-sv = std(LSPCAvar(:,kloc), 1);
+m = mean(LSPCArates(:,kloc,gamloc,lamloc), 1);
+v = mean(LSPCAvar(:,kloc,gamloc,lamloc), 1);
+sm = std(LSPCArates(:,kloc,gamloc,lamloc), 1);
+sv = std(LSPCAvar(:,kloc,gamloc,lamloc), 1);
 sprintf('LSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
 loc = find(avgkLSPCA==min(avgkLSPCA,[],'all'),1,'last');
-[~,klock,siglock] = ind2sub(size(avgkLSPCA), loc);
+[~,klock,gamloc,lamloc,siglock] = ind2sub(size(avgkLSPCA), loc);
 k = ks(klock);
-m = mean(kLSPCArates(:,klock,siglock), 1);
-v = mean(kLSPCAvar(:,klock,siglock), 1);
-sm = std(kLSPCArates(:,klock,siglock), 1);
-sv = std(kLSPCAvar(:,klock,siglock), 1);
+m = mean(kLSPCArates(:,klock,gamloc,lamloc,siglock), 1);
+v = mean(kLSPCAvar(:,klock,gamloc,lamloc,siglock), 1);
+sm = std(kLSPCArates(:,klock,gamloc,lamloc,siglock), 1);
+sv = std(kLSPCAvar(:,klock,gamloc,lamloc,siglock), 1);
 sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 

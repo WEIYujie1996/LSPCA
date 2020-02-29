@@ -69,7 +69,7 @@ while notConverged
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
     problem.cost  = @(L) 0.5*( (1/Ynorm^2)*((1/var_y)*norm(Y - X*(L*(X*L \ Y)), 'fro')^2 + + n*q*log(var_y)) + (1/Xnorm^2)*((1/var_x)*((norm(X, 'fro')^2-(alpha/(var_x+alpha))*norm(X*L, 'fro')^2)) + n*(p-k)*log(var_x) + n*k*log(var_x+alpha)));
-    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*(X*L \ Y))))*(X*L \ Y)' - - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);
+    problem.egrad = @(L) -(1/var_y)*(1/Ynorm^2)*(X'*(Y-X*(L*(X*L \ Y))))*(X*L \ Y)' - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L);
     options.verbosity = 0;
     options.stopfun = @mystopfun;
     options.maxiter = 2000;

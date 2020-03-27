@@ -920,36 +920,36 @@ sv = std(mle_kLSPCAvalVar_fixed);
 sprintf('kLSPCAerr: $%0.3f \\pm %0.3f \\ (%i)$ & $%0.3f \\pm %0.3f$', m, sm, k, v, sv)
 
 
-% %% plot error - var tradeoff curves
-% 
-% % for t = 1:length(ks)
-% figure()
-% hold on
-% plot(mean(PCAvalVar_fixed), mean(PCAval_fixed), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
-% % plot(mean(kPCAvalVar_fixed), mean(kPCAval_fixed), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(squeeze(LSPCAvar(end,2,:)), squeeze(LSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(squeeze(kLSPCAvar(end,2,:)), squeeze(kLSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(mean(mle_LSPCAvalVar_fixed), mean(mle_LSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(mean(mle_kLSPCAvalVar_fixed), mean(mle_kLSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
-% plot(mean(ISPCAvalVar_fixed), mean(ISPCAval_fixed), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(SPPCAvalVar_fixed), mean(SPPCAval_fixed), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(SPCAvalVar_fixed), mean(SPCAval_fixed), '+', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(kSPCAvalVar_fixed), mean(kSPCAval_fixed), '>', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(RRRvalVar_fixed), mean(RRRval_fixed), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(PLSvalVar_fixed), mean(PLSval_fixed), 'h', 'MarkerSize', 20, 'LineWidth', 2)
-% plot(mean(SSVDvalVar_fixed), mean(SSVDval_fixed), 'd', 'MarkerSize', 20, 'LineWidth', 2)
-% 
-% xlabel('Variation Explained', 'fontsize', 25)
-% %title('Test', 'fontsize', 25)
-% ylabel('MSE', 'fontsize', 25)
-% %title(sprintf('k = %d', ks(t)), 'fontsize', 30)
-% set(gca, 'fontsize', 25)
-% lgd = legend('PCA', 'LSPCA', 'kLSPCA', 'LSPCA (MLE)', 'kLSPCA (MLE)', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'R4', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
-% %lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
-% %ylim([0, 0.12])
-% %set(gca, 'YScale', 'log')
-% xlim([0,1])
-% 
+%% plot error - var tradeoff curves
+
+% for t = 1:length(ks)
+figure()
+hold on
+plot(mean(PCAvalVar_fixed), mean(PCAval_fixed), 'sk', 'MarkerSize', 20, 'LineWidth', 2)
+% plot(mean(kPCAvalVar_fixed), mean(kPCAval_fixed), 'sr', 'MarkerSize', 20, 'LineWidth', 2)
+plot(squeeze(LSPCAvar(end,2,:)), squeeze(LSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+plot(squeeze(kLSPCAvar(end,2,:)), squeeze(kLSPCArates(end,2,:)), '.-', 'LineWidth', 2, 'MarkerSize', 20)
+plot(mean(mle_LSPCAvalVar_fixed), mean(mle_LSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
+plot(mean(mle_kLSPCAvalVar_fixed), mean(mle_kLSPCAval_fixed), '*', 'LineWidth', 2, 'MarkerSize', 20)
+plot(mean(ISPCAvalVar_fixed), mean(ISPCAval_fixed), 'mx', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(SPPCAvalVar_fixed), mean(SPPCAval_fixed), 'pc', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(SPCAvalVar_fixed), mean(SPCAval_fixed), '+', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(kSPCAvalVar_fixed), mean(kSPCAval_fixed), '>', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(RRRvalVar_fixed), mean(RRRval_fixed), 'k*', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(PLSvalVar_fixed), mean(PLSval_fixed), 'h', 'MarkerSize', 20, 'LineWidth', 2)
+plot(mean(SSVDvalVar_fixed), mean(SSVDval_fixed), 'd', 'MarkerSize', 20, 'LineWidth', 2)
+
+xlabel('Variation Explained', 'fontsize', 25)
+%title('Test', 'fontsize', 25)
+ylabel('MSE', 'fontsize', 25)
+%title(sprintf('k = %d', ks(t)), 'fontsize', 30)
+set(gca, 'fontsize', 25)
+lgd = legend('PCR', 'LSPCA (CV)', 'kLSPCA (CV)', 'LSPCA (MLE)', 'kLSPCA (MLE)', 'ISPCA', 'SPPCA', 'Barshan', 'kBarshan', 'RRR', 'PLS', 'SSVD', 'Location', 'best'); lgd.FontSize = 15;
+%lgd = legend('LSPCA', 'R4', 'PLS', 'SPPCA', 'Barshan', 'SSVD', 'PCA', 'Location', 'southeast'); lgd.FontSize = 15;
+%ylim([0, 0.12])
+%set(gca, 'YScale', 'log')
+xlim([0,1])
+
 % %% plot error - var tradeoff curves
 % 
 % % for t = 1:length(ks)

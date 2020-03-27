@@ -146,7 +146,7 @@ for j = 1:numClasses
         g = g - dLdij; % add and repeat for next class
     end
 end
-g = g - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*L'*L); %add derivative for PCA term
+g = g - 2*(1/var_x)*(1/Xnorm^2)*(1/gamma)*(X'*(X*L)) + (1/var_x)*(1/Xnorm^2)*(1/gamma^2)*((L*((L'*X')*X))*L + (((X')*X)*L)*(L'*L)); %add derivative for PCA term
 end
 
 function stopnow = mystopfun(problem, x, info, last)

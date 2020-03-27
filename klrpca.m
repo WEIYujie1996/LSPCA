@@ -38,6 +38,7 @@ function  [Z, L, B, K] = klrpca(X, Y, lambda, sigma, k, Linit, Kinit)
 %a kernel matrix in place of X
 if sigma == 0 && sum(abs(Kinit),'all') == 0 %to specify using a linear kernel (faster if n < p)
     X = X*X';
+    X = X - mean(X); X = (X' - mean(X'))'; %centered kernel matrix
 elseif sum(abs(Kinit),'all') == 0
     X = gaussian_kernel(X, X, sigma);
 else
@@ -79,8 +80,8 @@ while notConverged
     warning('off', 'manopt:getgradient:approx')
     manifold = grassmannfactory(p, k, 1);
     problem.M = manifold;
-    problem.cost  = @(Ltilde) cost_fun(Ltilde, B, B0, X, Ymask, Xnorm, n, lambda);
-    problem.egrad = @(Ltilde) Lgrad(Ltilde, B, B0, X, Y, Xnorm, numClasses, n, p, k,  lambda);
+    problem.cost  = @(L) cost_fun(L, B, B0, X, Ymask, Xnorm, n, lambda);
+    problem.egrad = @(L) Lgrad(L, B, B0, X, Y, Xnorm, numClasses, n, p, k,  lambda);
     options.verbosity = 0;
     %options.minstepsize = 1e-12;
     options.stopfun = @mystopfun;
@@ -108,6 +109,7 @@ end
 % set the output variables
 Z = X*L;
 B = [B0;B];
+K=X;
 end
 
 function f = cost_fun(L, B, B0, X, Ymask, Xnorm, n, lambda)

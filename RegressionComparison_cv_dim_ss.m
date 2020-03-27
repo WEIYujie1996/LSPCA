@@ -610,6 +610,13 @@ for dd = 1:numExps
     PCAval(dd) = PCArates(end,kloc);
     PCAvalVar(dd) = PCAvar(end,kloc);
     
+    % cv over subspace dim
+    loc = find(avgkPCA==min(avgkPCA,[],'all'),1,'last');
+    [~,kloc,sigloc] = ind2sub(size(avgkPCA), loc);
+    kkpca = ks(kloc);
+    kPCAval(dd) = kPCArates(end,kloc,sigloc);
+    kPCAvalVar(dd) = kPCAvar(end,kloc,sigloc);
+    
     loc = find(avgLSPCA==min(avgLSPCA,[],'all'),1,'last');
     [~,kloc,lamloc] = ind2sub(size(avgLSPCA), loc);
     klspca = ks(kloc);
@@ -694,6 +701,13 @@ for dd = 1:numExps
     kpca = ks(kloc);
     PCAval_fixed(dd) = PCArates(end,kloc);
     PCAvalVar_fixed(dd) = PCAvar(end,kloc);
+    
+    % cv over subspace dim
+    loc = find(avgkPCA(:,kloc,:)==min(avgkPCA(:,kloc,:),[],'all'),1,'last');
+    [~,~,sigloc] = ind2sub(size(avgkPCA(:,kloc,:)), loc);
+    kkpca = ks(kloc);
+    kPCAval(dd) = kPCArates(end,kloc,sigloc);
+    kPCAvalVar(dd) = kPCAvar(end,kloc,sigloc);
     
     loc = find(avgLSPCA(:,kloc,:)==min(avgLSPCA(:,kloc,:),[],'all'),1,'last');
     [~,~,lamloc] = ind2sub(size(avgLSPCA(:,kloc,:)), loc);

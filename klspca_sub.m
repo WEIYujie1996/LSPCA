@@ -44,6 +44,7 @@ function [Z, L, B, K] = klspca_sub(X, Y, lambda, sigma, k, L0, Kinit)
 %create kernel matrix
 if sigma == 0 && sum(abs(Kinit),'all') == 0 %to specify using a linear kernel (faster if n < p)
     X = X*X';
+    X = X - mean(X); X = (X' - mean(X'))'; %centered kernel matrix
 elseif sum(abs(Kinit),'all') == 0
     X = gaussian_kernel(X, X, sigma);
 else

@@ -401,10 +401,10 @@ for dd = 1:numExps
     loc = find(avgkLSPCA(:,kloc,:,:)==min(avgkLSPCA(:,kloc,:,:),[],'all'),1,'last');
     [~,~,lamlock,siglock] = ind2sub(size(avgkLSPCA(:,kloc,:,:)), loc);
     kklspca = ks(kloc);
-    kLSPCAval(dd) = kLSPCArates(end,kloc,lamlock,siglock);
-    kLSPCAvalVar(dd) = kLSPCAvar(end,kloc,lamlock,siglock);
-    kLSPCAval_train(dd) = kLSPCArates_train(end,kloc,lamlock,siglock);
-    kLSPCAvalVar_train(dd) = kLSPCAvar_train(end,kloc,lamlock,siglock);
+    kLSPCAval_fixed(dd) = kLSPCArates(end,kloc,lamlock,siglock);
+    kLSPCAvalVar_fixed(dd) = kLSPCAvar(end,kloc,lamlock,siglock);
+    kLSPCAval_fixed_train(dd) = kLSPCArates_train(end,kloc,lamlock,siglock);
+    kLSPCAvalVar_fixed_train(dd) = kLSPCAvar_train(end,kloc,lamlock,siglock);
     
     loc = find(avgkLSPCAmle(:,kloc,:)==min(avgkLSPCAmle(:,kloc,:),[],'all'),1,'last');
     [~,~,sigloc] = ind2sub(size(avgkLSPCAmle(:,kloc,:)), loc);
@@ -446,7 +446,7 @@ for dd = 1:numExps
     
 end
 %% save all data
-save(strcat(dataset, '_results_dim'))
+save(strcat(dataset, '_kernel'))
 
 %% print mean performance with std errors
 

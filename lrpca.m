@@ -17,23 +17,14 @@ function [ Z, L, B] = lrpca(X, Y, lambda, k, Linit)
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
 %
-%       numIter: number of iterations to run the optimization
-%       program
-%
-%       maxSubIter: maximum number of iterations to solve for L
-%       during each outer iteration
-%
 %
 % Outputs:
 %
-%       Z: (n x k) dimension reduced form of X; A = X*L'
+%       Z: (n x k) dimension reduced form of X; Z = X*L'
 %
 %       L: (p x k) matrix with colspanspan equal to the desired subspace
 %
 %       B: (k x numClasses) coefficients mapping reduced X to Y
-%
-%       B0: (k x 1) bias of the coefficients
-%
 
 %store dimensions:
 [n, p] = size(X);

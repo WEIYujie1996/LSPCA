@@ -1,44 +1,32 @@
 function [Z, L, B, K] = klspca_sub(X, Y, lambda, sigma, k, L0, Kinit)
-
-
-% this is the one with a single parameter
-
 % Inputs:
 %       X: (n x p) data matrix columns are features rows are
 %       observations
 %
 %       Y: (n x q) Response Variables
 %
-%       lambda: tuning parameter (higher lambda -> more empasis on
-%       capturing response varable relationship)
+%       lambda: PCA tuning parameter
+%
+%       sigma: kernel bandwidth
 %
 %       k: desired number of reduced dimensions
 %
-%       L0: initial guess at a subspace
+%       L0 (p x k): initial guess at a subspace
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
 %
-%       numIter: number of iterations to run the optimization
-%       program
-%
-%       maxSubIter: maximum number of iterations to solve for L
-%       during each outer iteration
-%
+%       Kinit (n x n): optional kernel matrix initialization, pass 0 if you want the program to construct the kernel matrix
 %
 % Outputs:
 %
-%       A: (n x k) dimension reduced form of X; A = X*L'
+%       Z: (n x k) dimension reduced form of X; Z = X*L'
 %
 %       L: (k x p) matrix with rowspan equal to the desired subspace
 %
 %       B: (k x q) regression coefficients mapping reduced X to Y
 %           i.e. Y = X*L'*B
 %
-%       PCAvariationCaputred: total variation captured by the PCA
-%       term of the objective function on a scale of [0, 1]
-%
-%       LSvariationCaputred: total variation captured by the Least
-%       Squares term of the objective function on a scale of [0, 1]
+%       K (n x n): kernel matrix
 
 
 %create kernel matrix

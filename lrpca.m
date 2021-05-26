@@ -7,9 +7,7 @@ function [ Z, L, B] = lrpca(X, Y, lambda, k, Linit)
 %       Y: (n x 1) Categorical Response Variables (1, 2, ...,
 %       numClasses)
 %
-%       gamma: tuning parameter
-%
-%       sigma: gaussian kernel parameter
+%       lambda: PCA tuning parameter
 %
 %       k: desired number of reduced dimensions
 %

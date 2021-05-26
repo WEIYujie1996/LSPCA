@@ -1,11 +1,5 @@
 function [Z, L, B] = lspca_sub(X, Y, lambda, k, L0)
 
-
-        % NOTE: we are using the convention that the the data points lie in the
-        % rows of X, therefore our convention for Stiefel manifold is 
-        % L*L'= I, while the definition in manopt is L'*L = I, so we must
-        % solve the problem in therms of L'
-        
         % Inputs:
         %       X: (n x p) data matrix columns are features rows are
         %       observations
@@ -21,27 +15,15 @@ function [Z, L, B] = lspca_sub(X, Y, lambda, k, L0)
         %           -default: pass in L0 = 0 and first k principle
         %           components will be used
         %
-        %       numIter: number of iterations to run the optimization
-        %       program
-        %
-        %       maxSubIter: maximum number of iterations to solve for L
-        %       during each outer iteration
-        %
-        %
         % Outputs:
         %
         %       A: (n x k) dimension reduced form of X; A = X*L'
         %
-        %       L: (k x p) matrix with rowspan equal to the desired subspace
+        %       L: (p x k) matrix with rowspan equal to the desired subspace
         %
         %       B: (k x q) regression coefficients mapping reduced X to Y
         %           i.e. Y = X*L'*B
         %
-        %       PCAvariationCaputred: total variation captured by the PCA
-        %       term of the objective function on a scale of [0, 1]
-        %
-        %       LSvariationCaputred: total variation captured by the Least
-        %       Squares term of the objective function on a scale of [0, 1]
 
 
 

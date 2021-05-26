@@ -7,21 +7,11 @@ function [ Z, L, B] = lrpca_MLE(X, Y, k, Linit)
 %       Y: (n x 1) Categorical Response Variables (1, 2, ...,
 %       numClasses)
 %
-%       gamma: tuning parameter
-%
-%       sigma: gaussian kernel parameter
-%
 %       k: desired number of reduced dimensions
 %
 %       Linit: (pxk) initial guess at a subspace
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
-%
-%       numIter: number of iterations to run the optimization
-%       program
-%
-%       maxSubIter: maximum number of iterations to solve for L
-%       during each outer iteration
 %
 %
 % Outputs:
@@ -31,8 +21,6 @@ function [ Z, L, B] = lrpca_MLE(X, Y, k, Linit)
 %       L: (p x k) matrix with colspanspan equal to the desired subspace
 %
 %       B: (k x numClasses) coefficients mapping reduced X to Y
-%
-%       B0: (k x 1) bias of the coefficients
 %
 
 %store dimensions:

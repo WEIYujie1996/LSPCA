@@ -6,21 +6,17 @@ function  [Z, L, B, K] = klrpca(X, Y, lambda, sigma, k, Linit, Kinit)
 %       Y: (n x 1) Categorical Response Variables (1, 2, ...,
 %       numClasses)
 %
-%       gamma: tuning parameter
+%       lambda: PCA term tuning parameter
 %
 %       sigma: gaussian kernel parameter
 %
-%       k: desired number of reduced dimensions
+%       k: desired reduced dimension
 %
-%       Linit: (pxk) initial guess at a subspace
+%       Linit: (p x k) initial guess at a subspace
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
 %
-%       numIter: number of iterations to run the optimization
-%       program
-%
-%       maxSubIter: maximum number of iterations to solve for L
-%       during each outer iteration
+%       Kinit: (n x n) optional kernel matrix initialization, input 0 if you want the program to construct the kernel matrix 
 %
 %
 % Outputs:
@@ -31,7 +27,7 @@ function  [Z, L, B, K] = klrpca(X, Y, lambda, sigma, k, Linit, Kinit)
 %
 %       B: (k x numClasses) coefficients mapping reduced X to Y
 %
-%       B0: (k x 1) bias of the coefficients
+%       K: (n x n) kernel matrix
 %
 
 %The kernel procedure is exactly the same as the regular procedure but with

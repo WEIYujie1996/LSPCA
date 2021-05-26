@@ -1,4 +1,4 @@
-function [Z, L, B, var_x, var_y, alpha] = lspca_MLE_sub(X, Y, k, L0, sstol)
+function [Z, L, B, var_x, var_y, alpha] = lspca_MLE_sub(X, Y, k, L0)
 % Inputs:
 %       X: (n x p) data matrix columns are features rows are
 %       observations

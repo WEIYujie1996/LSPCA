@@ -1,15 +1,19 @@
-function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit, sstol)
+function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit)
 % Inputs:
 %       X: (n x p) data matrix columns are features rows are
 %       observations
 %
 %       Y: (n x q) Response Variables
 %
+%       sigma: kernel bandwidth
+%
 %       k: desired number of reduced dimensions
 %
 %       L0: (p x k) initial guess at a subspace
 %           -default: pass in L0 = 0 and first k principle
 %           components will be used
+%
+%       Kinit: (n x n) optional kernel matrix initialization, pass in 0 if you want the program to construct the kernel matrix
 %
 % Outputs:
 %
@@ -19,6 +23,8 @@ function [Z, L, B, K] = klspca_MLE_sub(X, Y, sigma, k, L0, Kinit, sstol)
 %
 %       B: (k x q) regression coefficients mapping reduced X to Y
 %           i.e. Y = X*L'*B
+%
+%       K: (n x n) kernel matrix
 
 
 %create kernel matrix
